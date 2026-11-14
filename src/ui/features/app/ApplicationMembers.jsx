@@ -1,21 +1,56 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getApplication, addApplicationMember }
   from '../../../infrastructure/api/catalogApi.js';
+import { SearchRow } from '../../components/Feedback.jsx';
+import { SortIco } from '../../components/Icons.jsx';
 
 const ROLES = ['developer', 'technical-lead', 'product-owner'];
 const initials = (s = '') =>
   (s.split(/[\s-_]+/).filter(Boolean).map((w) => w[0]).join('') || s || '?')
     .slice(0, 2).toUpperCase();
 
+const COLUMNS = [
+  { key: 'name', label: 'Miembro',
+    value: (am) => am.members?.full_name || am.github_username },
+  { key: 'username', label: 'Usuario', value: (am) => am.github_username },
+  { key: 'role', label: 'Rol', value: (am) => am.role },
+];
+
 // "Miembros de la aplicación" — per-app roles. Platform access comes from
 // the members registry; here each member gets a role scoped to this app.
 export default function ApplicationMembers({ name, members = [], onGoMembers }) {
   const [row, setRow] = useState(null);   // null = loading, false = not found
   const [showForm, setShowForm] = useState(false);
+  const [q, setQ] = useState('');
+  const [sort, setSort] = useState({ key: 'name', dir: 1 });
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const reload = useCallback(
     () => getApplication(name).then(setRow).catch(() => setRow(false)), [name]);
   useEffect(() => { reload(); }, [reload]);
+
+  const rows = useMemo(() => {
+    const lq = q.toLowerCase();
+    const list = (row?.application_members || []).filter((am) => !lq
+      || (am.members?.full_name || '').toLowerCase().includes(lq)
+      || am.github_username.toLowerCase().includes(lq));
+    const col = COLUMNS.find((c) => c.key === sort.key);
+    if (col)
+      list.sort((a, b) => String(col.value(a)).localeCompare(String(col.value(b))) * sort.dir);
+    return list;
+  }, [row, q, sort]);
+
+  const cycle = (key) => setSort((s) =>
+    s.key !== key ? { key, dir: 1 } : s.dir === 1 ? { key, dir: -1 } : { key: null, dir: 1 });
+
+  // oxlint-disable-next-line react-hooks/set-state-in-effect — deliberate reset
+  useEffect(() => setPage(1), [q, pageSize]);
+  const pages = Math.max(1, Math.ceil(rows.length / pageSize));
+  const safePage = Math.min(page, pages);
+  const visible = rows.slice((safePage - 1) * pageSize, safePage * pageSize);
+  const from = rows.length ? (safePage - 1) * pageSize + 1 : 0;
+  const to = (safePage - 1) * pageSize + visible.length;
 
   if (row === false)
     return <div className="card"><p className="alert-error">Aplicación no encontrada.</p></div>;
@@ -28,21 +63,25 @@ export default function ApplicationMembers({ name, members = [], onGoMembers }) 
 
   return (
     <div className="card">
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
-        <h2 style={{ margin: 0 }}>Miembros de la aplicación</h2>
-        <button className="btn btn-primary" style={{ marginLeft: 'auto' }}
-          onClick={() => setShowForm(true)}>Agregar miembro +</button>
-      </div>
+      <h2>Buscar miembro de la aplicación</h2>
+      <SearchRow q={q} setQ={setQ} placeholder="Buscar miembro"
+        action={
+          <button className="btn btn-primary" style={{ marginLeft: 'auto' }}
+            onClick={() => setShowForm(true)}>Agregar miembro +</button>
+        } />
+      <p className="tbl-legend">Buscar por nombre o usuario</p>
       <table>
         <thead>
           <tr>
-            <th>Miembro</th>
-            <th>Usuario</th>
-            <th>Rol</th>
+            {COLUMNS.map((c) => (
+              <th key={c.key} className="th-sort" onClick={() => cycle(c.key)}>
+                {c.label}<SortIco column={c.key} sort={sort} />
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
-          {ams.map((am) => (
+          {visible.map((am) => (
             <tr key={am.github_username}>
               <td>
                 <span className="member-name">
@@ -56,7 +95,24 @@ export default function ApplicationMembers({ name, members = [], onGoMembers }) 
           ))}
         </tbody>
       </table>
-      {!ams.length && <p className="muted">La aplicación aún no tiene miembros.</p>}
+      {!rows.length &&
+        <p className="muted">{ams.length
+          ? 'Sin miembros para esa búsqueda.' : 'La aplicación aún no tiene miembros.'}</p>}
+      <div className="tbl-foot">
+        <select className="page-size" value={pageSize}
+          onChange={(e) => setPageSize(Number(e.target.value))}>
+          {[10, 25, 50].map((n) => <option key={n} value={n}>{n}</option>)}
+        </select>
+        <span className="pager">
+          <span className="muted">{from} a {to} de {rows.length} Elementos</span>
+          <button disabled={safePage <= 1} onClick={() => setPage(safePage - 1)}>‹ Ant</button>
+          {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
+            <button key={p} className={p === safePage ? 'active' : ''}
+              onClick={() => setPage(p)}>{p}</button>
+          ))}
+          <button disabled={safePage >= pages} onClick={() => setPage(safePage + 1)}>Sig ›</button>
+        </span>
+      </div>
       {showForm && (
         <MemberModal appName={name} candidates={candidates}
           onGoMembers={onGoMembers}
