@@ -45,11 +45,13 @@ const NAV = [
 const SIDEBAR = ['aplicaciones', 'equipo', 'miembros'];
 const APP_NAV = [
   { id: 'app-detail', label: 'Aplicación', icon: ICON.logo },
+  { id: 'app-members', label: 'Equipo', icon: ICON.equipo },
   { id: 'app-components', label: 'Componentes', icon: ICON.componentes },
-  { id: 'app-members', label: 'Miembros', icon: ICON.equipo },
+  { id: 'app-security', label: 'Seguridad', icon: ICON.seguridad },
+  { id: 'app-releases', label: 'Releases', icon: ICON.releases },
 ];
-const APP_VIEWS = ['app-detail', 'app-components', 'app-members',
-  'component-detail', 'nuevo-componente'];
+const APP_VIEWS = ['app-detail', 'app-members', 'app-components',
+  'app-security', 'app-releases', 'component-detail', 'nuevo-componente'];
 const TEAM_NAV = [
   { id: 'team-detail', label: 'Equipo', icon: ICON.equipo },
   { id: 'team-members', label: 'Miembros del equipo', icon: ICON.equipo },
@@ -64,19 +66,24 @@ const SLUG_TOP = {
 };
 const enc = encodeURIComponent;
 
-const pathFor = ({ view, appName, componentName, teamId, releaseNo }) => {
-  if (view === 'app-detail') return `/ensemble/applications/${enc(appName)}`;
+const pathFor = ({ view, appRef, componentName, teamId, releaseNo }) => {
+  if (view === 'app-detail')
+    return `/ensemble/applications/${enc(appRef)}/detail`;
   if (view === 'app-components')
-    return `/ensemble/applications/${enc(appName)}/components`;
+    return `/ensemble/applications/${enc(appRef)}/components`;
   if (view === 'app-members')
-    return `/ensemble/applications/${enc(appName)}/members`;
+    return `/ensemble/applications/${enc(appRef)}/members`;
+  if (view === 'app-security')
+    return `/ensemble/applications/${enc(appRef)}/security`;
+  if (view === 'app-releases')
+    return `/ensemble/applications/${enc(appRef)}/releases`;
   if (view === 'component-detail')
-    return appName
-      ? `/ensemble/applications/${enc(appName)}/components/${enc(componentName)}`
+    return appRef
+      ? `/ensemble/applications/${enc(appRef)}/components/${enc(componentName)}`
       : `/ensemble/components/${enc(componentName)}`;
   if (view === 'nuevo-componente')
-    return appName
-      ? `/ensemble/applications/${enc(appName)}/components/new`
+    return appRef
+      ? `/ensemble/applications/${enc(appRef)}/components/new`
       : '/ensemble/components/new';
   if (view === 'team-detail') return `/ensemble/teams/${enc(teamId)}/detail`;
   if (view === 'team-members') return `/ensemble/teams/${enc(teamId)}/members`;
@@ -89,14 +96,15 @@ const parsePath = () => {
     .split('/').filter(Boolean).map(decodeURIComponent);
   if (seg[0] === 'applications' && seg[1]) {
     if (seg[2] === 'components' && seg[3] === 'new')
-      return { view: 'nuevo-componente', appName: seg[1] };
+      return { view: 'nuevo-componente', appRef: seg[1] };
     if (seg[2] === 'components' && seg[3])
-      return { view: 'component-detail', appName: seg[1], componentName: seg[3] };
+      return { view: 'component-detail', appRef: seg[1], componentName: seg[3] };
     if (seg[2] === 'components')
-      return { view: 'app-components', appName: seg[1] };
-    if (seg[2] === 'members')
-      return { view: 'app-members', appName: seg[1] };
-    return { view: 'app-detail', appName: seg[1] };
+      return { view: 'app-components', appRef: seg[1] };
+    if (seg[2] === 'members') return { view: 'app-members', appRef: seg[1] };
+    if (seg[2] === 'security') return { view: 'app-security', appRef: seg[1] };
+    if (seg[2] === 'releases') return { view: 'app-releases', appRef: seg[1] };
+    return { view: 'app-detail', appRef: seg[1] };
   }
   if (seg[0] === 'components') {
     if (seg[1] === 'new') return { view: 'nuevo-componente' };
@@ -125,7 +133,7 @@ export default function App() {
   const [view, setView] = useState('home');
   const [releaseNo, setReleaseNo] = useState(null);
   const [componentName, setComponentName] = useState(null);
-  const [appName, setAppName] = useState(null);
+  const [appRef, setAppRef] = useState(null);   // id or name — URL slug
   const [teamId, setTeamId] = useState(null);
   const [q, setQ] = useState('');
   const [filters, setFilters] = useState({ plantilla: '', estado: '' });
@@ -141,7 +149,7 @@ export default function App() {
     const apply = () => {
       const s = parsePath();
       setView(s.view || 'home');
-      setAppName(s.appName || null);
+      setAppRef(s.appRef || null);
       setComponentName(s.componentName || null);
       setTeamId(s.teamId || null);
       setReleaseNo(s.releaseNo || null);
@@ -153,14 +161,18 @@ export default function App() {
 
   // state → URL.
   useEffect(() => {
-    const path = pathFor({ view, appName, componentName, teamId, releaseNo });
+    const path = pathFor({ view, appRef, componentName, teamId, releaseNo });
     if (window.location.pathname !== path)
       window.history.pushState(null, '', path);
-  }, [view, appName, componentName, teamId, releaseNo]);
+  }, [view, appRef, componentName, teamId, releaseNo]);
 
-  const appCtx = appName && APP_VIEWS.includes(view);
+  const appCtx = appRef && APP_VIEWS.includes(view);
+  const app = (applications || []).find(
+    (a) => String(a.id) === String(appRef) || a.name === appRef);
+  const appLabel = app?.name || appRef;
   const team = (teams || []).find((t) => String(t.id) === String(teamId));
-  const { releases, reload: reloadReleases } = useReleases(view === 'releases');
+  const { releases, reload: reloadReleases } = useReleases(
+    ['releases', 'app-releases'].includes(view));
 
   if (me === undefined) return <CenterCard title="Ensemble" sub="Cargando…" />;
   if (me?.forbidden) return <Unauthorized />;
@@ -169,11 +181,13 @@ export default function App() {
   if (!manifest) return <CenterCard title="Ensemble" sub="Cargando…" />;
 
   const detailLabels = {
+    'app-detail': 'Detalle de Aplicación',
+    'app-members': 'Equipo',
     'app-components': 'Componentes',
-    'app-members': 'Miembros de la aplicación',
+    'app-security': 'Seguridad',
+    'app-releases': 'Releases',
     'nuevo-componente': 'Componentes / Nuevo componente',
     'release-detail': 'Releases / Detalle',
-    'app-detail': 'Aplicaciones / Detalle',
     'team-detail': 'Detalle de Equipo',
     'team-members': 'Miembros del Equipo',
     'component-detail': 'Componentes / Detalles del componente',
@@ -183,7 +197,9 @@ export default function App() {
     : detailLabels[view] || NAV.find((n) => n.id === view)?.label || '';
   const lower = q.toLowerCase();
   const appComponentNames = appCtx
-    ? catalog.filter((c) => c.application === appName).map((c) => c.name) : [];
+    ? catalog.filter((c) => c.application === appLabel).map((c) => c.name) : [];
+  const appReleases = appCtx ? (releases || []).filter((r) =>
+    !r.components || r.components.some((c) => appComponentNames.includes(c))) : [];
   const appManifest = appCtx ? {
     ...manifest,
     components: (manifest.components || [])
@@ -213,9 +229,15 @@ export default function App() {
             <>
               <a onClick={() => setView('aplicaciones')}>Aplicaciones</a>
               <span className="sep">/</span>
-              <a onClick={() => setView('app-detail')}>{appName}</a>
+              <a onClick={() => setView('app-detail')}>{appLabel}</a>
               {view === 'app-members' && (
-                <><span className="sep">/</span><span>Miembros</span></>
+                <><span className="sep">/</span><span>Equipo</span></>
+              )}
+              {view === 'app-security' && (
+                <><span className="sep">/</span><span>Seguridad</span></>
+              )}
+              {view === 'app-releases' && (
+                <><span className="sep">/</span><span>Releases</span></>
               )}
               {['app-components', 'component-detail', 'nuevo-componente'].includes(view) && (
                 <>
@@ -234,11 +256,6 @@ export default function App() {
             <>
               <a onClick={() => { setView('releases'); reloadReleases(); }}>Releases</a>
               <span className="sep">/</span><span>Detalle</span>
-            </>
-          ) : view === 'app-detail' ? (
-            <>
-              <a onClick={() => setView('aplicaciones')}>Aplicaciones</a>
-              <span className="sep">/</span><span>{appName}</span>
             </>
           ) : teamCtx ? (
             <>
@@ -265,6 +282,12 @@ export default function App() {
             {teamCtx && (
               <a className="sidebar-back"
                 onClick={() => { setView('equipo'); setTeamId(null); }}>
+                ‹ {!collapsed && 'Volver'}
+              </a>
+            )}
+            {appCtx && (
+              <a className="sidebar-back"
+                onClick={() => { setView('aplicaciones'); setAppRef(null); }}>
                 ‹ {!collapsed && 'Volver'}
               </a>
             )}
@@ -305,23 +328,32 @@ export default function App() {
           {view === 'aplicaciones' && (
             <ApplicationsView applications={applications} me={me}
               onChanged={reloadApplications}
-              onOpen={(n) => { setAppName(n); setView('app-detail'); }} />
+              onOpen={(n) => { setAppRef(n); setView('app-detail'); }} />
           )}
 
           {view === 'app-detail' && (
-            <ApplicationDetail name={appName}
+            <ApplicationDetail name={appRef}
               onOpenComponent={(n) => { setComponentName(n); setView('component-detail'); }}
               onNewComponent={() => setView('nuevo-componente')} />
           )}
 
           {view === 'app-members' && (
-            <ApplicationMembers name={appName} members={members}
-              onGoMembers={() => { setAppName(null); setView('miembros'); }} />
+            <ApplicationMembers name={appRef} members={members}
+              onGoMembers={() => { setAppRef(null); setView('miembros'); }} />
+          )}
+
+          {view === 'app-security' && (
+            <SecurityView me={me} app={appLabel} />
+          )}
+
+          {view === 'app-releases' && (
+            <ReleasesView releases={appReleases} me={me} onChanged={reloadReleases}
+              onOpen={(n) => { setReleaseNo(n); setView('release-detail'); }} />
           )}
 
           {view === 'home' && (
             <HomeView me={me} applications={applications}
-              onOpen={(n) => { setAppName(n); setView('app-detail'); }} />
+              onOpen={(n) => { setAppRef(n); setView('app-detail'); }} />
           )}
 
           {/* Platform card kept but unlinked — reachable only by direct
@@ -344,7 +376,7 @@ export default function App() {
               <p className="muted" style={{ fontSize: 12, margin: '-8px 0 14px' }}>
                 Buscar por nombre, nombre corto o plantilla</p>
               <ComponentsTable manifest={appManifest}
-                catalog={catalog.filter((c) => c.application === appName)}
+                catalog={catalog.filter((c) => c.application === appLabel)}
                 templates={templates} q={lower} filters={filters} onChanged={reloadCatalog}
                 onOpen={(n) => { setComponentName(n); setView('component-detail'); setQ(''); }} />
             </div>
@@ -457,7 +489,7 @@ export default function App() {
       {wizardTemplate && (
         <ComponentWizard template={wizardTemplate}
           applications={applications}
-          defaultApplication={appName}
+          defaultApplication={app?.name || null}
           components={(manifest.components || [])
             .filter((c) => !c.type || c.type === 'app').map((c) => c.name)}
           onClose={() => setWizardTemplate(null)}

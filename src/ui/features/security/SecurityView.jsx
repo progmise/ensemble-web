@@ -8,7 +8,7 @@ const NAME_RE = /^[A-Z_][A-Z0-9_]*$/;
 // "Seguridad → Secretos" — platform secret registry. Values are
 // write-only (loaded here, never read back); the allowed environments come
 // from the session (`me.secret_envs`) — developer: cert/pre only.
-export default function SecurityView({ me }) {
+export default function SecurityView({ me, app }) {
   const envs = me?.secret_envs?.length ? me.secret_envs : ['cert', 'pre'];
   const [env, setEnv] = useState(envs[0]);
   const [q, setQ] = useState('');
@@ -37,8 +37,9 @@ export default function SecurityView({ me }) {
   };
 
   const rows = useMemo(() => (secrets || [])
+    .filter((s) => !app || s.name.toUpperCase() === app.toUpperCase())
     .filter((s) => !q || s.name.toLowerCase().includes(q.toLowerCase())),
-    [secrets, q]);
+    [secrets, q, app]);
 
   return (
     <div className="card">
@@ -52,11 +53,13 @@ export default function SecurityView({ me }) {
           <span>Entorno</span>
           <Select value={env} options={envOptions} onChange={pickEnv} />
         </label>
-        <label className="field sec-filter grow">
-          <span>Filtrar secreto</span>
-          <input value={q} placeholder="Filtrar por nombre"
-            onChange={(e) => setQ(e.target.value)} />
-        </label>
+        {!app && (
+          <label className="field sec-filter grow">
+            <span>Filtrar secreto</span>
+            <input value={q} placeholder="Filtrar por nombre"
+              onChange={(e) => setQ(e.target.value)} />
+          </label>
+        )}
         <button className="btn btn-primary sec-new"
           onClick={() => setModal({})}>Nuevo Secreto +</button>
       </div>
@@ -87,7 +90,7 @@ export default function SecurityView({ me }) {
         </p>
       )}
       {modal && (
-        <SecretModal env={env} envOptions={envOptions} edit={modal.edit}
+        <SecretModal env={env} envOptions={envOptions} edit={modal.edit} app={app}
           onClose={() => setModal(null)} onSaved={reload} />
       )}
     </div>
@@ -98,9 +101,9 @@ export default function SecurityView({ me }) {
 // clave/valor entries (write-only) — 2) summary with the vault path.
 // One secret = one applicativo holding N entries; the server merges them
 // into the stored map, so blank edit rows keep their existing values.
-function SecretModal({ env, envOptions, edit, onClose, onSaved }) {
+function SecretModal({ env, envOptions, edit, app, onClose, onSaved }) {
   const [step, setStep] = useState(1);
-  const [name, setName] = useState(edit?.name || '');
+  const [name, setName] = useState(edit?.name || (app || '').toUpperCase());
   const [environment, setEnvironment] = useState(env);
   const [entries, setEntries] = useState(
     (edit?.keys || []).map((key) => ({ key, value: '', show: false }))
@@ -150,7 +153,8 @@ function SecretModal({ env, envOptions, edit, onClose, onSaved }) {
           <div className="form">
             <label className="field">
               <span>Nombre del Secreto *</span>
-              <input value={name} placeholder="Ingresa el nombre del secreto" disabled={Boolean(edit)}
+              <input value={name} placeholder="Ingresa el nombre del secreto"
+                disabled={Boolean(edit) || Boolean(app)}
                 onChange={(e) => setName(e.target.value.toUpperCase())} />
               <small className="muted">Nombre del aplicativo (mayúsculas)</small>
             </label>

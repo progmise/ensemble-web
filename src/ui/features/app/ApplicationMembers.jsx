@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { getApplication, addApplicationMember }
   from '../../../infrastructure/api/catalogApi.js';
 
@@ -13,8 +13,9 @@ export default function ApplicationMembers({ name, members = [], onGoMembers }) 
   const [row, setRow] = useState(null);   // null = loading, false = not found
   const [showForm, setShowForm] = useState(false);
 
-  const reload = () => getApplication(name).then(setRow).catch(() => setRow(false));
-  useEffect(() => { reload(); }, [name]);
+  const reload = useCallback(
+    () => getApplication(name).then(setRow).catch(() => setRow(false)), [name]);
+  useEffect(() => { reload(); }, [reload]);
 
   if (row === false)
     return <div className="card"><p className="alert-error">Aplicación no encontrada.</p></div>;

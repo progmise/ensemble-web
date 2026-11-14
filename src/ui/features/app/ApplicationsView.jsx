@@ -86,7 +86,7 @@ export default function ApplicationsView({ applications = [], me,
           {visible.map((a) => (
             <tr key={a.name}>
               <td>
-                <button className="linklike member-name" onClick={() => onOpen(a.name)}>
+                <button className="linklike member-name" onClick={() => onOpen(a.id ?? a.name)}>
                   <span className="avatar sq">{initials(a.alias || a.name)}</span>
                   <strong>{a.name.toUpperCase()}</strong>
                 </button>
@@ -122,7 +122,7 @@ export default function ApplicationsView({ applications = [], me,
   );
 }
 
-function ApplicationModal({ catalog, onClose, onCreated }) {
+function ApplicationModal({ onClose, onCreated }) {
   const [form, setForm] = useState({ name: '', alias: '', description: '' });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getTeam, addTeamMember } from '../../../infrastructure/api/catalogApi.js';
 import { SearchRow } from '../../components/Feedback.jsx';
 import { SortIco } from '../../components/Icons.jsx';
@@ -23,20 +23,20 @@ export default function TeamMembers({ id, members = [], onGoMembers }) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const reload = () => getTeam(id).then(setRow).catch(() => setRow(false));
-  useEffect(() => { reload(); }, [id]);
+  const reload = useCallback(
+    () => getTeam(id).then(setRow).catch(() => setRow(false)), [id]);
+  useEffect(() => { reload(); }, [reload]);
 
-  const tms = row?.team_members || [];
   const rows = useMemo(() => {
     const lq = q.toLowerCase();
-    const list = tms.filter((tm) => !lq
+    const list = (row?.team_members || []).filter((tm) => !lq
       || (tm.members?.full_name || '').toLowerCase().includes(lq)
       || tm.github_username.toLowerCase().includes(lq));
     const col = COLUMNS.find((c) => c.key === sort.key);
     if (col)
       list.sort((a, b) => String(col.value(a)).localeCompare(String(col.value(b))) * sort.dir);
     return list;
-  }, [tms, q, sort]);
+  }, [row, q, sort]);
 
   const cycle = (key) => setSort((s) =>
     s.key !== key ? { key, dir: 1 } : s.dir === 1 ? { key, dir: -1 } : { key: null, dir: 1 });
@@ -54,6 +54,7 @@ export default function TeamMembers({ id, members = [], onGoMembers }) {
   if (!row)
     return <div className="card"><p className="muted">Cargando…</p></div>;
 
+  const tms = row.team_members || [];
   const inTeam = new Set(tms.map((t) => t.github_username));
   const candidates = members.filter((m) => !inTeam.has(m.github_username));
 
