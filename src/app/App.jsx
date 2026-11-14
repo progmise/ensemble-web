@@ -41,7 +41,7 @@ const NAV = [
 
 // Sidebar — top level shows only the settled sections; inside an
 // application the sidebar switches to the app-scoped nav.
-const SIDEBAR = ['aplicaciones', 'equipo'];
+const SIDEBAR = ['aplicaciones', 'equipo', 'miembros'];
 const APP_NAV = [
   { id: 'app-detail', label: 'Aplicación', icon: ICON.logo },
   { id: 'app-components', label: 'Componentes', icon: ICON.componentes },
