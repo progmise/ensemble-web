@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getApplication } from '../../../infrastructure/api/catalogApi.js';
 import { StatusPill } from '../../components/Feedback.jsx';
+import { GhIcon } from '../../components/Icons.jsx';
 
 const dateOnly = (iso) => (iso ? new Date(iso).toLocaleDateString() : '—');
 const initials = (s = '') =>
@@ -19,6 +20,7 @@ const appStatus = (components = []) => {
 // Components live under the Componentes nav, not here.
 export default function ApplicationDetail({ name, onGoMembers }) {
   const [row, setRow] = useState(null);   // null = loading, false = not found
+  const [toolsOpen, setToolsOpen] = useState(false);
 
   useEffect(() => {
     getApplication(name).then(setRow).catch(() => setRow(false));
@@ -30,8 +32,7 @@ export default function ApplicationDetail({ name, onGoMembers }) {
     return <div className="card"><p className="muted">Cargando…</p></div>;
 
   const ams = row.application_members || [];
-  const repoQuery = `https://github.com/orgs/progmise/repositories?q=${
-    encodeURIComponent(row.repo_prefix || row.name)}`;
+  const repos = (row.components || []).map((c) => c.repo).filter(Boolean);
 
   return (
     <div className="card app-detail">
@@ -61,7 +62,6 @@ export default function ApplicationDetail({ name, onGoMembers }) {
       <section className="app-side">
         <div className="app-id app-id-side">
           <div><label>Compañía</label><strong>Personal</strong></div>
-          <div><label>Unidad de negocio</label><strong>{row.business_unit || '—'}</strong></div>
           <div><label>Ciclo de vida</label><strong>{row.lifecycle || '—'}</strong></div>
         </div>
         <div className="app-owners">
@@ -86,8 +86,25 @@ export default function ApplicationDetail({ name, onGoMembers }) {
         <div className="app-tools">
           <label>Herramientas</label>
           <div className="tools-btns">
-            <a className="btn btn-outline" href={repoQuery}
-              target="_blank" rel="noreferrer">GitHub</a>
+            <button className="btn btn-outline" onClick={() => setToolsOpen((o) => !o)}>
+              {GhIcon} GitHub
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+            {toolsOpen && (
+              <>
+                <div className="menu-overlay" onClick={() => setToolsOpen(false)} />
+                <div className="tools-pop">
+                  {repos.map((r) => (
+                    <a key={r} href={`https://github.com/${r}`}
+                      target="_blank" rel="noreferrer">{GhIcon} {r}</a>
+                  ))}
+                  {!repos.length && <a className="muted">Sin repositorios</a>}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </section>
