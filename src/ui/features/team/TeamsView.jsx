@@ -106,7 +106,8 @@ export default function TeamsView({ teams = [], members = [], onChanged, onOpen 
 }
 
 function TeamModal({ teams, members, onClose, onCreated }) {
-  const [form, setForm] = useState({ name: '', shortname: '', type: '', description: '' });
+  const [form, setForm] = useState({ name: '', shortname: '', type: '', description: '',
+    can_create_apps: false });
   const [owners, setOwners] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
@@ -166,6 +167,14 @@ function TeamModal({ teams, members, onClose, onCreated }) {
             <span>Descripción</span>
             <textarea rows="3" value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
+          </label>
+          <label className="field">
+            <span>
+              <input type="checkbox" checked={form.can_create_apps}
+                onChange={(e) => setForm((f) => ({ ...f, can_create_apps: e.target.checked }))} />
+              {' '}Puede crear aplicaciones
+            </span>
+            <small className="muted">Solo miembros de equipos habilitados pueden registrar aplicaciones</small>
           </label>
           <span className="field">
             <span>Propietarios</span>

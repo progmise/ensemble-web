@@ -13,6 +13,7 @@ import ComponentDetail from '../ui/features/components/ComponentDetail.jsx';
 import ApplicationView from '../ui/features/app/ApplicationView.jsx';
 import ApplicationsView from '../ui/features/app/ApplicationsView.jsx';
 import ApplicationDetail from '../ui/features/app/ApplicationDetail.jsx';
+import ApplicationMembers from '../ui/features/app/ApplicationMembers.jsx';
 import HomeView from '../ui/features/app/HomeView.jsx';
 import FiltersMenu from '../ui/features/components/FiltersMenu.jsx';
 import DependencyGraph from '../ui/features/components/DependencyGraph.jsx';
@@ -45,8 +46,10 @@ const SIDEBAR = ['aplicaciones', 'equipo', 'miembros'];
 const APP_NAV = [
   { id: 'app-detail', label: 'Aplicación', icon: ICON.logo },
   { id: 'app-components', label: 'Componentes', icon: ICON.componentes },
+  { id: 'app-members', label: 'Miembros', icon: ICON.equipo },
 ];
-const APP_VIEWS = ['app-detail', 'app-components', 'component-detail', 'nuevo-componente'];
+const APP_VIEWS = ['app-detail', 'app-components', 'app-members',
+  'component-detail', 'nuevo-componente'];
 const TEAM_NAV = [
   { id: 'team-detail', label: 'Equipo', icon: ICON.equipo },
   { id: 'team-members', label: 'Miembros del equipo', icon: ICON.equipo },
@@ -65,6 +68,8 @@ const pathFor = ({ view, appName, componentName, teamId, releaseNo }) => {
   if (view === 'app-detail') return `/ensemble/applications/${enc(appName)}`;
   if (view === 'app-components')
     return `/ensemble/applications/${enc(appName)}/components`;
+  if (view === 'app-members')
+    return `/ensemble/applications/${enc(appName)}/members`;
   if (view === 'component-detail')
     return appName
       ? `/ensemble/applications/${enc(appName)}/components/${enc(componentName)}`
@@ -89,6 +94,8 @@ const parsePath = () => {
       return { view: 'component-detail', appName: seg[1], componentName: seg[3] };
     if (seg[2] === 'components')
       return { view: 'app-components', appName: seg[1] };
+    if (seg[2] === 'members')
+      return { view: 'app-members', appName: seg[1] };
     return { view: 'app-detail', appName: seg[1] };
   }
   if (seg[0] === 'components') {
@@ -126,7 +133,7 @@ export default function App() {
   const [menu, setMenu] = useState(false);
   const teamCtx = teamId && TEAM_VIEWS.includes(view);
   const { members, reload: reloadMembers } = useMembers(
-    ['equipo', 'miembros'].includes(view) || teamCtx);
+    ['equipo', 'miembros', 'app-members'].includes(view) || teamCtx);
   const { teams, reload: reloadTeams } = useTeams(view === 'equipo' || teamCtx);
 
   // URL → state: initial load + back/forward.
@@ -163,6 +170,7 @@ export default function App() {
 
   const detailLabels = {
     'app-components': 'Componentes',
+    'app-members': 'Miembros de la aplicación',
     'nuevo-componente': 'Componentes / Nuevo componente',
     'release-detail': 'Releases / Detalle',
     'app-detail': 'Aplicaciones / Detalle',
@@ -206,7 +214,10 @@ export default function App() {
               <a onClick={() => setView('aplicaciones')}>Aplicaciones</a>
               <span className="sep">/</span>
               <a onClick={() => setView('app-detail')}>{appName}</a>
-              {view !== 'app-detail' && (
+              {view === 'app-members' && (
+                <><span className="sep">/</span><span>Miembros</span></>
+              )}
+              {['app-components', 'component-detail', 'nuevo-componente'].includes(view) && (
                 <>
                   <span className="sep">/</span>
                   <a onClick={() => setView('app-components')}>Componentes</a>
@@ -301,6 +312,11 @@ export default function App() {
             <ApplicationDetail name={appName}
               onOpenComponent={(n) => { setComponentName(n); setView('component-detail'); }}
               onNewComponent={() => setView('nuevo-componente')} />
+          )}
+
+          {view === 'app-members' && (
+            <ApplicationMembers name={appName} members={members}
+              onGoMembers={() => { setAppName(null); setView('miembros'); }} />
           )}
 
           {view === 'home' && (

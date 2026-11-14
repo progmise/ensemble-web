@@ -52,6 +52,10 @@ export function getApplication(name) {
   return apiGet(`/api/applications/${encodeURIComponent(name)}`);
 }
 
+export function addApplicationMember(name, body) {
+  return apiSend(`/api/applications/${encodeURIComponent(name)}/members`, 'POST', body);
+}
+
 // Team registry — groups of members owning functionality areas.
 export function getTeams() {
   return apiGet('/api/teams');

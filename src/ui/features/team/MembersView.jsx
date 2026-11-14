@@ -3,8 +3,6 @@ import { createMember } from '../../../infrastructure/api/catalogApi.js';
 import { SearchRow } from '../../components/Feedback.jsx';
 import { SortIco } from '../../components/Icons.jsx';
 
-const ROLE_LABEL = { developer: 'developer', 'technical-lead': 'technical-lead', 'product-owner': 'product-owner' };
-const MEMBER_ROLES = ['developer', 'technical-lead', 'product-owner'];
 const dateOnly = (iso) => (iso ? new Date(iso).toLocaleDateString() : '—');
 const initials = (name) =>
   (name || '?').split(/\s+/).filter(Boolean).slice(0, 2)
@@ -13,13 +11,12 @@ const initials = (name) =>
 const COLUMNS = [
   { key: 'full_name', label: 'Nombre completo', value: (m) => m.full_name },
   { key: 'email', label: 'Email', value: (m) => m.email },
-  { key: 'roles', label: 'Roles' },
+  { key: 'github_username', label: 'Usuario', value: (m) => m.github_username },
   { key: 'created_at', label: 'Fecha de registro', value: (m) => m.created_at },
 ];
 
-// Team list — "Lista del equipo". Members grant repo access
-// (developer) or PR-approval rights (technical-lead); registration date is
-// the alta timestamp from the API.
+// Member registry — platform access only. What a member can do is defined
+// per application (roles) and per team (ownership).
 export default function MembersView({ members, onChanged }) {
   const [q, setQ] = useState('');
   const [sort, setSort] = useState({ key: 'full_name', dir: 1 });
@@ -48,7 +45,7 @@ export default function MembersView({ members, onChanged }) {
           <button className="btn btn-primary" style={{ marginLeft: 'auto' }}
             onClick={() => setShowForm(true)}>Nuevo miembro +</button>
         } />
-      <p className="tbl-legend">Miembros del equipo</p>
+      <p className="tbl-legend">Miembros de la plataforma</p>
       <table>
         <thead>
           <tr>
@@ -70,11 +67,7 @@ export default function MembersView({ members, onChanged }) {
                 </span>
               </td>
               <td><span className="muted">{m.email}</span></td>
-              <td><span className="chips">
-                {(m.roles || []).map((r) => (
-                  <span key={r} className={`chip role-${r}`}>{ROLE_LABEL[r] || r}</span>
-                ))}
-              </span></td>
+              <td><code>{m.github_username}</code></td>
               <td><span className="muted">{dateOnly(m.created_at)}</span></td>
             </tr>
           ))}
@@ -88,18 +81,13 @@ export default function MembersView({ members, onChanged }) {
 
 function MemberModal({ onClose, onCreated }) {
   const [form, setForm] = useState({
-    github_username: '', full_name: '', email: '', roles: ['developer'],
+    github_username: '', full_name: '', email: '',
   });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
 
-  const toggleRole = (r) => setForm((f) => ({
-    ...f,
-    roles: f.roles.includes(r) ? f.roles.filter((x) => x !== r) : [...f.roles, r],
-  }));
-
   const ok = form.github_username.trim() && form.full_name.trim()
-    && /\S+@\S+\.\S+/.test(form.email) && form.roles.length;
+    && /\S+@\S+\.\S+/.test(form.email);
 
   const submit = async () => {
     setBusy(true);
@@ -140,21 +128,10 @@ function MemberModal({ onClose, onCreated }) {
               onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
             <small className="muted">El de su cuenta de GitHub</small>
           </label>
-          <span className="field">
-            <span>Roles *</span>
-            <span className="chips">
-              {MEMBER_ROLES.map((r) => (
-                <button key={r} type="button"
-                  className={`chip role-toggle${form.roles.includes(r) ? ` role-${r} on` : ''}`}
-                  onClick={() => toggleRole(r)}>
-                  {ROLE_LABEL[r]}
-                </button>
-              ))}
-            </span>
-            <small className="muted">
-              developer: acceso a los repos · technical-lead: aprueba PRs · product-owner: dueño de releases
-            </small>
-          </span>
+          <small className="muted">
+            El alta solo habilita el acceso a la plataforma — los roles se
+            asignan por aplicación.
+          </small>
         </div>
         <div className="modal-foot">
           <button className="btn-text btn-cancel" onClick={onClose}>Cancelar</button>
