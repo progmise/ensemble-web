@@ -18,7 +18,7 @@ const COLUMNS = [
 
 // "Lista de aplicaciones" — search + lifecycle filters + register +
 // sortable table.
-export default function ApplicationsView({ applications = [], catalog = [], me,
+export default function ApplicationsView({ applications = [], me,
                                            onChanged, onOpen }) {
   const [q, setQ] = useState('');
   const [cycles, setCycles] = useState([]);
@@ -116,26 +116,16 @@ export default function ApplicationsView({ applications = [], catalog = [], me,
         </span>
       </div>
       {showForm && (
-        <ApplicationModal catalog={catalog}
-          onClose={() => setShowForm(false)} onCreated={onChanged} />
+        <ApplicationModal onClose={() => setShowForm(false)} onCreated={onChanged} />
       )}
     </div>
   );
 }
 
 function ApplicationModal({ catalog, onClose, onCreated }) {
-  const [form, setForm] = useState({
-    name: '', alias: '', business_unit: '', description: '', repo_prefix: '',
-    lifecycle: 'Development',
-  });
-  const [picked, setPicked] = useState([]);
+  const [form, setForm] = useState({ name: '', alias: '', description: '' });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
-
-  // Only unattached components can be assigned to a new application.
-  const loose = (catalog || []).filter((c) => !c.application);
-  const toggle = (n) => setPicked((p) =>
-    p.includes(n) ? p.filter((x) => x !== n) : [...p, n]);
 
   const ok = NAME_RE.test(form.name)
     && (!form.alias.trim() || SHORTNAME_RE.test(form.alias));
@@ -144,7 +134,7 @@ function ApplicationModal({ catalog, onClose, onCreated }) {
     setBusy(true);
     setError(null);
     try {
-      await createApplication({ ...form, components: picked });
+      await createApplication(form);
       onCreated?.();
       onClose();
     } catch (e) {
@@ -175,45 +165,10 @@ function ApplicationModal({ catalog, onClose, onCreated }) {
             <small className="muted">mayúsculas y dígitos — abreviatura corta del nombre (ej. ENS); se deduce del nombre si queda vacío</small>
           </label>
           <label className="field">
-            <span>Unidad de negocio</span>
-            <input value={form.business_unit} placeholder="ejemplo: progmise"
-              onChange={(e) => setForm((f) => ({ ...f, business_unit: e.target.value }))} />
-          </label>
-          <label className="field">
-            <span>Prefijo de repositorio</span>
-            <input value={form.repo_prefix} placeholder={form.name || 'ejemplo: loans'}
-              onChange={(e) => setForm((f) => ({ ...f, repo_prefix: e.target.value.toLowerCase() }))} />
-            <small className="muted">
-              Los repos nuevos se llaman {(form.repo_prefix || form.name || '…')}-{'{componente}'} —
-              vacío = el nombre de la aplicación
-            </small>
-          </label>
-          <label className="field">
-            <span>Ciclo de vida</span>
-            <select value={form.lifecycle}
-              onChange={(e) => setForm((f) => ({ ...f, lifecycle: e.target.value }))}>
-              {APP_LIFECYCLES.map((l) => <option key={l} value={l}>{l}</option>)}
-            </select>
-          </label>
-          <label className="field">
             <span>Descripción</span>
             <textarea rows="3" value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
           </label>
-          <span className="field">
-            <span>Componentes</span>
-            <span className="chips">
-              {loose.map((c) => (
-                <button key={c.name} type="button"
-                  className={`chip role-toggle${picked.includes(c.name) ? ' chip-teal on' : ''}`}
-                  onClick={() => toggle(c.name)}>
-                  {c.shortname || c.name}
-                </button>
-              ))}
-              {!loose.length && <small className="muted">No hay componentes sin asignar</small>}
-            </span>
-            <small className="muted">Componentes existentes que se agrupan bajo esta aplicación</small>
-          </span>
         </div>
         <div className="modal-foot">
           <button className="btn-text btn-cancel" onClick={onClose}>Cancelar</button>
