@@ -16,8 +16,8 @@ export const STATUS_LABEL = {
 // Application lifecycle stages — mirrors APP_LIFECYCLES in the API domain;
 // the applications list filters by these.
 export const APP_LIFECYCLES = [
-  'Certification/Homologation', 'Decommissioned', 'Deleted', 'Development',
-  'Disuse/Inactive', 'Friends and Family', 'Preproduction', 'Production',
+  'Certification/Homologation', 'Deleted', 'Development',
+  'Disuse/Inactive', 'Preproduction', 'Production',
   'Test',
 ];
 
