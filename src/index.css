@@ -294,7 +294,8 @@ tbody tr:hover { background: var(--panel); }
 .th-sort:hover { color: var(--teal); }
 .sort-arrow { font-weight: 400; }
 .filters-menu { position: relative; display: inline-flex; }
-.filters-menu .btn { padding: 7px 16px; }
+.filters-menu .btn { padding: 7px 16px; display: inline-flex; align-items: center; gap: 6px; }
+.filters-menu .btn svg { width: 14px; height: 14px; }
 .filters-count {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 16px; height: 16px; border-radius: 999px;
@@ -335,8 +336,9 @@ tbody tr:hover { background: var(--panel); }
 }
 .filters-search button {
   border: none; background: none; cursor: pointer; color: var(--muted);
-  font-size: 12px; padding: 0 2px;
+  font-size: 12px; padding: 0 2px; display: inline-flex; align-items: center;
 }
+.filters-search button svg { width: 13px; height: 13px; }
 .filters-list {
   display: flex; flex-direction: column; gap: 2px; width: 100%;
   max-height: 240px; overflow: auto;

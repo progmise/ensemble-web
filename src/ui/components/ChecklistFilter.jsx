@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Ico, ICON } from './Icons.jsx';
 
 // Checklist filter popover — "Filtros <n>" button opens a titled panel with
 // a searchable checkbox list. Picks are staged; "Aplicar" commits them,
@@ -21,7 +22,8 @@ export default function ChecklistFilter({ title, options, applied = [], onApply,
     <span className="filters-menu">
       <button className={`btn btn-teal${applied.length ? ' has-active' : ''}`}
         onClick={toggleOpen}>
-        Filtros {applied.length > 0 && <span className="filters-count">{applied.length}</span>} ⌄
+        Filtros {applied.length > 0 && <span className="filters-count">{applied.length}</span>}
+        <Ico d={ICON.chevronDown} />
       </button>
       {open && (
         <span className="filters-pop filters-check" onMouseLeave={() => setOpen(false)}>
@@ -32,7 +34,8 @@ export default function ChecklistFilter({ title, options, applied = [], onApply,
               onChange={(e) => setQ(e.target.value)} />
             {draft.length > 0 &&
               <button title="Quitar selección" onClick={() => setDraft([])}>✕</button>}
-            <button title="Cerrar" onClick={() => setOpen(false)}>⌃</button>
+            <button title="Cerrar" onClick={() => setOpen(false)}>
+              <Ico d={ICON.chevronUp} /></button>
           </span>
           <span className="filters-list">
             {visible.map((o) => (
