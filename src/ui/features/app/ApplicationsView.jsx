@@ -1,21 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { NAME_RE, SHORTNAME_RE, APP_LIFECYCLES } from '../../../domain/component.js';
 import { createApplication } from '../../../infrastructure/api/catalogApi.js';
-import { SearchRow, StatusPill } from '../../components/Feedback.jsx';
+import { SearchRow } from '../../components/Feedback.jsx';
 import ChecklistFilter from '../../components/ChecklistFilter.jsx';
 import { SortIco } from '../../components/Icons.jsx';
 
 const initials = (s = '') =>
   (s.split(/[\s-_]+/).map((w) => w[0]).join('') || s || '?').slice(0, 2).toUpperCase();
-
-// Aggregate state: failed wins, then any pending state, then ready.
-const appStatus = (components = []) => {
-  if (!components.length) return null;
-  const states = components.map((c) => c.status);
-  if (states.includes('failed')) return 'failed';
-  const pending = states.find((s) => s !== 'ready');
-  return pending || 'ready';
-};
 
 const COLUMNS = [
   { key: 'name', label: 'Aplicación', value: (a) => a.name },
@@ -23,7 +14,6 @@ const COLUMNS = [
   { key: 'id', label: 'ID', value: (a) => a.id },
   { key: 'componentes', label: 'Componentes', value: (a) => (a.components || []).length },
   { key: 'lifecycle', label: 'Ciclo de vida', value: (a) => a.lifecycle },
-  { key: 'estado', label: 'Estado' },
 ];
 
 // "Lista de aplicaciones" — search + lifecycle filters + register +
@@ -99,7 +89,6 @@ export default function ApplicationsView({ applications = [], catalog = [], onCh
               <td>{a.id ?? '—'}</td>
               <td>{(a.components || []).length}</td>
               <td>{a.lifecycle || '—'}</td>
-              <td><StatusPill status={appStatus(a.components)} /></td>
             </tr>
           ))}
         </tbody>
