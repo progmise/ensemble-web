@@ -270,7 +270,7 @@ export default function App() {
           )}
 
           {view === 'aplicaciones' && (
-            <ApplicationsView applications={applications} catalog={catalog}
+            <ApplicationsView applications={applications} catalog={catalog} me={me}
               onChanged={reloadApplications}
               onOpen={(n) => { setAppName(n); setView('app-detail'); }} />
           )}

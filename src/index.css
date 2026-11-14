@@ -155,6 +155,7 @@ tbody tr:hover { background: #d5dbe6; }
 .btn-primary:hover { background: #c90000; text-decoration: none; }
 .btn-outline { background: #fff; border: 1px solid #cfd8e3; color: var(--text); }
 .btn-outline:hover { background: var(--panel); text-decoration: none; }
+.btn-outline.on { border-color: var(--teal); color: var(--teal); font-weight: 600; }
 .btn-teal { background: #fff; border: 1.5px solid var(--teal); color: var(--teal); }
 .btn-teal:hover { background: #e6f4f4; text-decoration: none; }
 

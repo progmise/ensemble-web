@@ -18,18 +18,22 @@ const COLUMNS = [
 
 // "Lista de aplicaciones" — search + lifecycle filters + register +
 // sortable table.
-export default function ApplicationsView({ applications = [], catalog = [], onChanged, onOpen }) {
+export default function ApplicationsView({ applications = [], catalog = [], me,
+                                           onChanged, onOpen }) {
   const [q, setQ] = useState('');
   const [cycles, setCycles] = useState([]);
+  const [mine, setMine] = useState(false);
   const [sort, setSort] = useState({ key: 'name', dir: 1 });
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [showForm, setShowForm] = useState(false);
 
+  const login = me?.user?.login || me?.member?.github_username || '';
   const rows = useMemo(() => {
     const lq = q.toLowerCase();
     const list = (applications || []).filter((a) =>
       (!cycles.length || cycles.includes(a.lifecycle))
+      && (!mine || a.created_by === login)
       && (!lq
         || a.name.toLowerCase().includes(lq)
         || (a.alias || '').toLowerCase().includes(lq)
@@ -38,7 +42,7 @@ export default function ApplicationsView({ applications = [], catalog = [], onCh
     if (col?.value)
       list.sort((a, b) => String(col.value(a)).localeCompare(String(col.value(b))) * sort.dir);
     return list;
-  }, [applications, q, cycles, sort]);
+  }, [applications, q, cycles, mine, login, sort]);
 
   const cycle = (key) => setSort((s) =>
     s.key !== key ? { key, dir: 1 } : s.dir === 1 ? { key, dir: -1 } : { key: null, dir: 1 });
@@ -57,6 +61,8 @@ export default function ApplicationsView({ applications = [], catalog = [], onCh
       <SearchRow q={q} setQ={setQ} placeholder="Nombre, alias o código"
         action={
           <>
+            <button className={`btn btn-outline${mine ? ' on' : ''}`}
+              onClick={() => setMine((m) => !m)}>Mis aplicaciones</button>
             <ChecklistFilter title="Filtrar por ciclo de vida"
               options={APP_LIFECYCLES} applied={cycles} onApply={setCycles}
               placeholder="Selecciona un ciclo de vida" />
