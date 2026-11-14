@@ -337,7 +337,7 @@ export default function App() {
           )}
 
           {view === 'app-members' && (
-            <ApplicationMembers name={appRef} members={members}
+            <ApplicationMembers name={appRef} members={members || []}
               onGoMembers={() => { setAppRef(null); setView('miembros'); }} />
           )}
 
