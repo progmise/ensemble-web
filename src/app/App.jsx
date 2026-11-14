@@ -229,9 +229,6 @@ export default function App() {
           ) : (
             <span>{viewLabel}</span>
           )}
-          <span className="muted" style={{ marginLeft: 'auto' }}>
-            release <code>v{manifest.version}</code>
-          </span>
         </div>
       )}
       <div className="layout">
