@@ -117,7 +117,7 @@ thead th {
 tbody td { padding: 12px; vertical-align: middle; }
 .app-comp-table tbody td { padding: 8px 12px; }
 tbody tr:nth-child(even) { background: #eff2fa; }
-tbody tr:hover { background: #dde0e8; }
+tbody tr:hover { background: #cfd4de; }
 
 /* --- Pills / chips --- */
 .pill {
