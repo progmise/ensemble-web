@@ -71,8 +71,12 @@ export default function ApplicationMembers({ name, members = [], onGoMembers }) 
   const candidates = members.filter((m) => !inApp.has(m.github_username));
 
   return (
-    <div className="card">
-      <h2>Lista del equipo</h2>
+    <>
+      <div className="detail-head">
+        <h2 className="detail-title">Equipo</h2>
+      </div>
+      <div className="card">
+      <p className="tbl-legend" style={{ marginTop: 0 }}>Buscar miembro</p>
       <SearchRow q={q} setQ={setQ}
         placeholder="Nombre, email o usuario"
         action={
@@ -134,7 +138,8 @@ export default function ApplicationMembers({ name, members = [], onGoMembers }) 
           onGoMembers={onGoMembers}
           onClose={() => setShowForm(false)} onAdded={reload} />
       )}
-    </div>
+      </div>
+    </>
   );
 }
 
