@@ -78,7 +78,7 @@ const pathFor = ({ view, appName, componentName, teamId, releaseNo }) => {
     return appName
       ? `/ensemble/applications/${enc(appName)}/components/new`
       : '/ensemble/components/new';
-  if (view === 'team-detail') return `/ensemble/teams/${enc(teamId)}`;
+  if (view === 'team-detail') return `/ensemble/teams/${enc(teamId)}/detail`;
   if (view === 'team-members') return `/ensemble/teams/${enc(teamId)}/members`;
   if (view === 'release-detail') return `/ensemble/releases/${releaseNo}`;
   return `/ensemble/${SLUG_TOP[view] || ''}`;
@@ -174,8 +174,8 @@ export default function App() {
     'nuevo-componente': 'Componentes / Nuevo componente',
     'release-detail': 'Releases / Detalle',
     'app-detail': 'Aplicaciones / Detalle',
-    'team-detail': 'Equipos / Detalle',
-    'team-members': 'Equipos / Miembros del equipo',
+    'team-detail': 'Detalle de Equipo',
+    'team-members': 'Miembros del Equipo',
     'component-detail': 'Componentes / Detalles del componente',
   };
   const viewLabel = view === 'home'
