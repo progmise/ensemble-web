@@ -12,7 +12,7 @@ const initials = (s = '') =>
 const COLUMNS = [
   { key: 'name', label: 'Nombre completo',
     value: (am) => am.members?.full_name || am.github_username },
-  { key: 'username', label: 'ID corporativo', value: (am) => am.github_username },
+  { key: 'username', label: 'Usuario', value: (am) => am.github_username },
   { key: 'email', label: 'Email', value: (am) => am.members?.email || '' },
   { key: 'roles', label: 'Roles', value: (am) => (am.roles || []).join(' ') },
   { key: 'added', label: 'Fecha de registro',
@@ -74,7 +74,7 @@ export default function ApplicationMembers({ name, members = [], onGoMembers }) 
     <div className="card">
       <h2>Lista del equipo</h2>
       <SearchRow q={q} setQ={setQ}
-        placeholder="Nombre, email o ID corporativo"
+        placeholder="Nombre, email o usuario"
         action={
           <button className="btn btn-primary" style={{ marginLeft: 'auto' }}
             onClick={() => setShowForm(true)}>Agregar miembro +</button>
