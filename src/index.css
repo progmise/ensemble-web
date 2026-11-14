@@ -523,6 +523,7 @@ tbody tr:hover { background: #d5dbe6; }
 .linklike:hover strong { color: var(--teal); text-decoration: underline; }
 
 .app-detail { display: grid; grid-template-columns: 4fr 6fr; padding: 0; overflow: hidden; }
+.app-detail > h2 { grid-column: 1 / -1; margin: 0; padding: 20px 30px 0; }
 .app-detail > section { padding: 26px 30px; min-width: 0; }
 .app-detail .app-side { border-left: 1px solid var(--line); }
 .app-hero { display: flex; align-items: center; gap: 16px; }

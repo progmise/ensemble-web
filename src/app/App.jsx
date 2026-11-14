@@ -68,7 +68,7 @@ const enc = encodeURIComponent;
 
 const pathFor = ({ view, appRef, componentName, teamId, releaseNo }) => {
   if (view === 'app-detail')
-    return `/ensemble/applications/${enc(appRef)}/detail`;
+    return `/ensemble/applications/${enc(appRef)}/detail/info`;
   if (view === 'app-components')
     return `/ensemble/applications/${enc(appRef)}/components`;
   if (view === 'app-members')
@@ -333,8 +333,7 @@ export default function App() {
 
           {view === 'app-detail' && (
             <ApplicationDetail name={appRef}
-              onOpenComponent={(n) => { setComponentName(n); setView('component-detail'); }}
-              onNewComponent={() => setView('nuevo-componente')} />
+              onGoMembers={() => setView('app-members')} />
           )}
 
           {view === 'app-members' && (

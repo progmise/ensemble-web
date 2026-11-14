@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getApplication } from '../../../infrastructure/api/catalogApi.js';
 import { StatusPill } from '../../components/Feedback.jsx';
-import { GhIcon } from '../../components/Icons.jsx';
 
 const dateOnly = (iso) => (iso ? new Date(iso).toLocaleDateString() : '—');
 const initials = (s = '') =>
@@ -15,9 +14,10 @@ const appStatus = (components = []) => {
   return pending || 'ready';
 };
 
-// Application detail — identity on the left, component list on
-// the right; each row opens the component detail.
-export default function ApplicationDetail({ name, onOpenComponent, onNewComponent }) {
+// Application detail ("Detalles de la aplicación") — identity + description
+// on the left; platform metadata, responsables and tool links on the right.
+// Components live under the Componentes nav, not here.
+export default function ApplicationDetail({ name, onGoMembers }) {
   const [row, setRow] = useState(null);   // null = loading, false = not found
 
   useEffect(() => {
@@ -29,24 +29,24 @@ export default function ApplicationDetail({ name, onOpenComponent, onNewComponen
   if (!row)
     return <div className="card"><p className="muted">Cargando…</p></div>;
 
-  const components = row.components || [];
+  const ams = row.application_members || [];
+  const repoQuery = `https://github.com/orgs/progmise/repositories?q=${
+    encodeURIComponent(row.repo_prefix || row.name)}`;
 
   return (
     <div className="card app-detail">
+      <h2 className="app-detail-title">Detalles de la aplicación</h2>
       <section className="app-main">
         <div className="app-hero">
           <span className="avatar big sq">{initials(row.alias || row.name)}</span>
           <h2>{(row.name || name).toUpperCase()}</h2>
         </div>
         <div className="app-id">
-          <div><label>ID</label><strong>{row.id ?? '—'}</strong></div>
-          <div><label>Aplicación</label><strong>{row.name || name}</strong></div>
+          <div><label>Código de aplicación</label><strong>{row.id ?? '—'}</strong></div>
           <div><label>Alias</label><strong>{row.alias || '—'}</strong></div>
-          <div><label>Unidad de negocio</label><strong>{row.business_unit || '—'}</strong></div>
-          <div><label>Ciclo de vida</label><strong>{row.lifecycle || '—'}</strong></div>
           <div><label>Estado</label>
-            {appStatus(components)
-              ? <StatusPill status={appStatus(components)} /> : <strong>—</strong>}
+            {appStatus(row.components)
+              ? <StatusPill status={appStatus(row.components)} /> : <strong>—</strong>}
           </div>
         </div>
         <div className="app-desc">
@@ -59,37 +59,36 @@ export default function ApplicationDetail({ name, onOpenComponent, onNewComponen
         </div>
       </section>
       <section className="app-side">
+        <div className="app-id app-id-side">
+          <div><label>Compañía</label><strong>Personal</strong></div>
+          <div><label>Unidad de negocio</label><strong>{row.business_unit || '—'}</strong></div>
+          <div><label>Ciclo de vida</label><strong>{row.lifecycle || '—'}</strong></div>
+        </div>
         <div className="app-owners">
-          <label>Componentes <span className="badge">{components.length}</span>
-            {onNewComponent &&
-              <button className="btn btn-primary app-comp-add"
-                onClick={onNewComponent}>Nuevo componente +</button>}
-          </label>
-          <table className="app-comp-table">
-            <tbody>
-              {components.map((c) => (
-                <tr key={c.name}>
-                  <td>
-                    <button className="linklike member-name"
-                      onClick={() => onOpenComponent(c.name)}>
-                      <span className="avatar sq">{initials(c.shortname || c.name)}</span>
-                      <strong>{c.name}</strong>
-                    </button>
-                  </td>
-                  <td><code>{c.shortname || '—'}</code></td>
-                  <td>{c.lifecycle || '—'}</td>
-                  <td><StatusPill status={c.status} /></td>
-                  <td>
-                    {c.repo &&
-                      <a href={`https://github.com/${c.repo}`} target="_blank" rel="noreferrer"
-                         title={c.repo}>{GhIcon}</a>}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {!components.length &&
-            <span className="muted">Sin componentes — creá uno desde Componentes.</span>}
+          <label>Responsables de Aplicación <span className="badge">{ams.length}</span></label>
+          <div className="owner-chips">
+            {ams.map((am) => (
+              <span key={am.github_username} className="owner-chip" title={am.role}>
+                <span className="avatar">
+                  {initials(am.members?.full_name || am.github_username)}
+                </span>
+                {am.members?.full_name || am.github_username}
+                <small className="muted">{am.role}</small>
+              </span>
+            ))}
+            {!ams.length && (
+              <span className="muted">Sin responsables —{' '}
+                <a className="linklike" onClick={onGoMembers}>sumalos desde Equipo</a>.
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="app-tools">
+          <label>Herramientas</label>
+          <div className="tools-btns">
+            <a className="btn btn-outline" href={repoQuery}
+              target="_blank" rel="noreferrer">GitHub</a>
+          </div>
         </div>
       </section>
     </div>
