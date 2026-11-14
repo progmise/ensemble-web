@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getApplication } from '../../../infrastructure/api/catalogApi.js';
-import { StatusPill } from '../../components/Feedback.jsx';
-import { GhIcon } from '../../components/Icons.jsx';
+import { GhIcon, Ico, ICON } from '../../components/Icons.jsx';
 
-const dateOnly = (iso) => (iso ? new Date(iso).toLocaleDateString() : '—');
 const initials = (s = '') =>
   (s.split(/[\s-_]+/).map((w) => w[0]).join('') || s || '?').slice(0, 2).toUpperCase();
 
@@ -15,9 +13,17 @@ const appStatus = (components = []) => {
   return pending || 'ready';
 };
 
+// Estado is an icon, not text — green check / red alert / muted clock.
+const StatusIco = ({ status }) => {
+  const [d, cls] = status === 'ready' ? [ICON.checkCircle, 'ok']
+    : status === 'failed' ? [ICON.alertCircle, 'bad']
+    : [ICON.clock, 'wait'];
+  return <span className={`st-ico ${cls}`} title={status}><Ico d={d} /></span>;
+};
+
 // Application detail ("Detalles de la aplicación") — identity + description
-// on the left; platform metadata, responsables and tool links on the right.
-// Components live under the Componentes nav, not here.
+// + useful links on the left; platform metadata, responsables and work
+// tools on the right. Components live under the Componentes nav.
 export default function ApplicationDetail({ name, onGoMembers }) {
   const [row, setRow] = useState(null);   // null = loading, false = not found
   const [toolsOpen, setToolsOpen] = useState(false);
@@ -33,81 +39,90 @@ export default function ApplicationDetail({ name, onGoMembers }) {
 
   const ams = row.application_members || [];
   const repos = (row.components || []).map((c) => c.repo).filter(Boolean);
+  const status = appStatus(row.components);
 
   return (
-    <div className="card app-detail">
-      <h2 className="app-detail-title">Detalles de la aplicación</h2>
-      <section className="app-main">
-        <div className="app-hero">
-          <span className="avatar big sq">{initials(row.alias || row.name)}</span>
-          <h2>{(row.name || name).toUpperCase()}</h2>
-        </div>
-        <div className="app-id">
-          <div><label>Código de aplicación</label><strong>{row.id ?? '—'}</strong></div>
-          <div><label>Alias</label><strong>{row.alias || '—'}</strong></div>
-          <div><label>Estado</label>
-            {appStatus(row.components)
-              ? <StatusPill status={appStatus(row.components)} /> : <strong>—</strong>}
+    <>
+      <div className="detail-head">
+        <h2 className="detail-title">Detalles de la aplicación</h2>
+      </div>
+      <div className="card app-detail">
+        <section className="app-main">
+          <div className="app-hero">
+            <span className="avatar big sq">{initials(row.alias || row.name)}</span>
+            <h2>{(row.name || name).toUpperCase()}</h2>
           </div>
-        </div>
-        <div className="app-desc">
-          <label>Descripción</label>
-          <p>{row.description || '—'}</p>
-        </div>
-        <div className="app-meta" style={{ marginTop: 18 }}>
-          <div><label>Creada</label><strong>{dateOnly(row.created_at)}</strong></div>
-          <div><label>Registrada por</label><strong>{row.created_by || '—'}</strong></div>
-        </div>
-      </section>
-      <section className="app-side">
-        <div className="app-id app-id-side">
-          <div><label>Compañía</label><strong>Personal</strong></div>
-          <div><label>Ciclo de vida</label><strong>{row.lifecycle || '—'}</strong></div>
-        </div>
-        <div className="app-owners">
-          <label>Responsables de Aplicación <span className="badge">{ams.length}</span></label>
-          <div className="owner-chips">
-            {ams.map((am) => (
-              <span key={am.github_username} className="owner-chip" title={am.role}>
-                <span className="avatar">
-                  {initials(am.members?.full_name || am.github_username)}
+          <div className="app-attrs">
+            <span><label>Código de aplicación</label><strong>{row.id ?? '—'}</strong></span>
+            <span><label>Alias</label><strong>{row.alias || '—'}</strong></span>
+            <span><label>Estado</label>
+              {status ? <StatusIco status={status} /> : <strong>—</strong>}
+            </span>
+          </div>
+          <div className="app-desc">
+            <label>Descripción</label>
+            <p>{row.description || '—'}</p>
+          </div>
+          <div className="app-links">
+            <label>Enlaces útiles</label>
+            <div className="link-chips">
+              <a href="https://github.com/progmise/deploy-manifest#readme"
+                target="_blank" rel="noreferrer">
+                Documentación <Ico d={ICON.extLink} /></a>
+              <a href="https://github.com/progmise/ensemble-web/issues"
+                target="_blank" rel="noreferrer">
+                Soporte <Ico d={ICON.extLink} /></a>
+            </div>
+          </div>
+        </section>
+        <section className="app-side">
+          <div className="app-id">
+            <div><label>Compañía</label><strong>Personal</strong></div>
+            <div><label>Ciclo de vida</label><strong>{row.lifecycle || '—'}</strong></div>
+          </div>
+          <div className="app-owners">
+            <label>Responsables de Aplicación <span className="badge">{ams.length}</span></label>
+            <div className="owner-chips">
+              {ams.map((am) => (
+                <span key={am.github_username} className="owner-chip" title={am.role}>
+                  <span className="avatar">
+                    {initials(am.members?.full_name || am.github_username)}
+                  </span>
+                  {am.members?.full_name || am.github_username}
+                  <Ico d={ICON.chevronDown} />
                 </span>
-                {am.members?.full_name || am.github_username}
-                <small className="muted">{am.role}</small>
-              </span>
-            ))}
-            {!ams.length && (
-              <span className="muted">Sin responsables —{' '}
-                <a className="linklike" onClick={onGoMembers}>sumalos desde Equipo</a>.
-              </span>
-            )}
+              ))}
+              {!ams.length && (
+                <span className="muted">Sin responsables —{' '}
+                  <a className="linklike" onClick={onGoMembers}>sumalos desde Equipo</a>.
+                </span>
+              )}
+            </div>
           </div>
-        </div>
-        <div className="app-tools">
-          <label>Herramientas</label>
-          <div className="tools-btns">
-            <button className="btn btn-outline" onClick={() => setToolsOpen((o) => !o)}>
-              {GhIcon} GitHub
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m6 9 6 6 6-6" />
-              </svg>
-            </button>
-            {toolsOpen && (
-              <>
-                <div className="menu-overlay" onClick={() => setToolsOpen(false)} />
-                <div className="tools-pop">
-                  {repos.map((r) => (
-                    <a key={r} href={`https://github.com/${r}`}
-                      target="_blank" rel="noreferrer">{GhIcon} {r}</a>
-                  ))}
-                  {!repos.length && <a className="muted">Sin repositorios</a>}
-                </div>
-              </>
-            )}
+          <div className="app-tools">
+            <p className="tools-note">
+              <Ico d={ICON.info} /> Las herramientas de trabajo se habilitan por aplicación.
+            </p>
+            <div className="tools-btns">
+              <button className="btn btn-outline" onClick={() => setToolsOpen((o) => !o)}>
+                {GhIcon} GitHub <Ico d={ICON.chevronDown} />
+              </button>
+              {toolsOpen && (
+                <>
+                  <div className="menu-overlay" onClick={() => setToolsOpen(false)} />
+                  <div className="tools-pop">
+                    {repos.map((r) => (
+                      <a key={r} href={`https://github.com/${r}`}
+                        target="_blank" rel="noreferrer">{GhIcon} {r}</a>
+                    ))}
+                    {!repos.length && <a className="muted">Sin repositorios</a>}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
-        </div>
-      </section>
-    </div>
+        </section>
+      </div>
+    </>
   );
 }
