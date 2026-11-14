@@ -72,7 +72,7 @@ const pathFor = ({ view, appRef, componentName, teamId, releaseNo }) => {
   if (view === 'app-components')
     return `/ensemble/applications/${enc(appRef)}/components`;
   if (view === 'app-members')
-    return `/ensemble/applications/${enc(appRef)}/members`;
+    return `/ensemble/applications/${enc(appRef)}/team/members`;
   if (view === 'app-security')
     return `/ensemble/applications/${enc(appRef)}/security`;
   if (view === 'app-releases')
@@ -101,7 +101,8 @@ const parsePath = () => {
       return { view: 'component-detail', appRef: seg[1], componentName: seg[3] };
     if (seg[2] === 'components')
       return { view: 'app-components', appRef: seg[1] };
-    if (seg[2] === 'members') return { view: 'app-members', appRef: seg[1] };
+    if (seg[2] === 'members' || (seg[2] === 'team' && seg[3] === 'members'))
+      return { view: 'app-members', appRef: seg[1] };
     if (seg[2] === 'security') return { view: 'app-security', appRef: seg[1] };
     if (seg[2] === 'releases') return { view: 'app-releases', appRef: seg[1] };
     return { view: 'app-detail', appRef: seg[1] };
