@@ -77,6 +77,7 @@ export default function ApplicationDetail({ name, onOpenComponent, onNewComponen
                     </button>
                   </td>
                   <td><code>{c.shortname || '—'}</code></td>
+                  <td>{c.lifecycle || '—'}</td>
                   <td><StatusPill status={c.status} /></td>
                   <td>
                     {c.repo &&
