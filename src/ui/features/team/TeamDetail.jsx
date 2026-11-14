@@ -17,12 +17,12 @@ const chips = (list) => list.map((tm) => {
 });
 
 // Team detail — identity card on the left, owners/members on the right.
-export default function TeamDetail({ name }) {
+export default function TeamDetail({ id }) {
   const [row, setRow] = useState(null);   // null = loading, false = not found
 
   useEffect(() => {
-    getTeam(name).then(setRow).catch(() => setRow(false));
-  }, [name]);
+    getTeam(id).then(setRow).catch(() => setRow(false));
+  }, [id]);
 
   if (row === false)
     return <div className="card"><p className="alert-error">Equipo no encontrado.</p></div>;
@@ -37,10 +37,11 @@ export default function TeamDetail({ name }) {
     <div className="card app-detail">
       <section className="app-main">
         <div className="app-hero">
-          <span className="avatar big">{initials(row.shortname || name)}</span>
-          <h2>{name}</h2>
+          <span className="avatar big">{initials(row.shortname || row.name)}</span>
+          <h2>{row.name}</h2>
         </div>
         <div className="app-id">
+          <div><label>ID</label><strong>{row.id ?? '—'}</strong></div>
           <div><label>Nombre corto</label><strong>{row.shortname || '—'}</strong></div>
           <div><label>Tipo</label><strong>{row.type || '—'}</strong></div>
         </div>

@@ -12,6 +12,7 @@ const COLUMNS = [
   { key: 'name', label: 'Nombre equipo', value: (t) => t.name },
   { key: 'shortname', label: 'Nombre corto equipo', value: (t) => t.shortname },
   { key: 'type', label: 'Tipo equipo', value: (t) => t.type || '-' },
+  { key: 'id', label: 'ID', value: (t) => t.id },
 ];
 
 // "Buscar equipo" — list of high-level teams owning functionality.
@@ -68,13 +69,14 @@ export default function TeamsView({ teams = [], members = [], onChanged, onOpen 
           {visible.map((t) => (
             <tr key={t.name}>
               <td>
-                <button className="linklike member-name" onClick={() => onOpen(t.name)}>
+                <button className="linklike member-name" onClick={() => onOpen(t.id)}>
                   <span className="avatar">{initials(t.shortname || t.name)}</span>
                   <strong>{t.name}</strong>
                 </button>
               </td>
               <td><code>{t.shortname || '—'}</code></td>
               <td>{t.type || '-'}</td>
+              <td>{t.id ?? '—'}</td>
             </tr>
           ))}
         </tbody>

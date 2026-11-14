@@ -61,8 +61,12 @@ export function createTeam(body) {
   return apiSend('/api/teams', 'POST', body);
 }
 
-export function getTeam(name) {
-  return apiGet(`/api/teams/${encodeURIComponent(name)}`);
+export function getTeam(id) {
+  return apiGet(`/api/teams/${encodeURIComponent(id)}`);
+}
+
+export function addTeamMember(id, body) {
+  return apiSend(`/api/teams/${encodeURIComponent(id)}/members`, 'POST', body);
 }
 
 // Release registry — RLSE records backed by the API; publish/deploy run

@@ -22,6 +22,7 @@ import OrchRuns from '../ui/features/deployments/OrchRuns.jsx';
 import MembersView from '../ui/features/team/MembersView.jsx';
 import TeamsView from '../ui/features/team/TeamsView.jsx';
 import TeamDetail from '../ui/features/team/TeamDetail.jsx';
+import TeamMembers from '../ui/features/team/TeamMembers.jsx';
 import SecurityView from '../ui/features/security/SecurityView.jsx';
 import { useMembers } from '../application/useMembers.js';
 import { useTeams } from '../application/useTeams.js';
@@ -46,6 +47,11 @@ const APP_NAV = [
   { id: 'app-components', label: 'Componentes', icon: ICON.componentes },
 ];
 const APP_VIEWS = ['app-detail', 'app-components', 'component-detail', 'nuevo-componente'];
+const TEAM_NAV = [
+  { id: 'team-detail', label: 'Equipo', icon: ICON.equipo },
+  { id: 'team-members', label: 'Miembros del equipo', icon: ICON.equipo },
+];
+const TEAM_VIEWS = ['team-detail', 'team-members'];
 
 // URL routing — /ensemble/<slug>[/<app>/components[/<id|new>]].
 const SLUG_TOP = {
@@ -55,7 +61,7 @@ const SLUG_TOP = {
 };
 const enc = encodeURIComponent;
 
-const pathFor = ({ view, appName, componentName, teamName, releaseNo }) => {
+const pathFor = ({ view, appName, componentName, teamId, releaseNo }) => {
   if (view === 'app-detail') return `/ensemble/applications/${enc(appName)}`;
   if (view === 'app-components')
     return `/ensemble/applications/${enc(appName)}/components`;
@@ -67,7 +73,8 @@ const pathFor = ({ view, appName, componentName, teamName, releaseNo }) => {
     return appName
       ? `/ensemble/applications/${enc(appName)}/components/new`
       : '/ensemble/components/new';
-  if (view === 'team-detail') return `/ensemble/teams/${enc(teamName)}`;
+  if (view === 'team-detail') return `/ensemble/teams/${enc(teamId)}`;
+  if (view === 'team-members') return `/ensemble/teams/${enc(teamId)}/members`;
   if (view === 'release-detail') return `/ensemble/releases/${releaseNo}`;
   return `/ensemble/${SLUG_TOP[view] || ''}`;
 };
@@ -89,7 +96,9 @@ const parsePath = () => {
     if (seg[1]) return { view: 'component-detail', componentName: seg[1] };
     return { view: 'componentes' };
   }
-  if (seg[0] === 'teams' && seg[1]) return { view: 'team-detail', teamName: seg[1] };
+  if (seg[0] === 'teams' && seg[2] === 'members')
+    return { view: 'team-members', teamId: seg[1] };
+  if (seg[0] === 'teams' && seg[1]) return { view: 'team-detail', teamId: seg[1] };
   if (seg[0] === 'releases' && seg[1]) return { view: 'release-detail', releaseNo: seg[1] };
   const view = Object.keys(SLUG_TOP).find((v) => SLUG_TOP[v] === seg[0]) || 'home';
   return { view };
@@ -110,13 +119,15 @@ export default function App() {
   const [releaseNo, setReleaseNo] = useState(null);
   const [componentName, setComponentName] = useState(null);
   const [appName, setAppName] = useState(null);
-  const [teamName, setTeamName] = useState(null);
+  const [teamId, setTeamId] = useState(null);
   const [q, setQ] = useState('');
   const [filters, setFilters] = useState({ plantilla: '', estado: '' });
   const [collapsed, setCollapsed] = useState(false);
   const [menu, setMenu] = useState(false);
-  const { members, reload: reloadMembers } = useMembers(view === 'equipo' || view === 'miembros');
-  const { teams, reload: reloadTeams } = useTeams(view === 'equipo');
+  const teamCtx = teamId && TEAM_VIEWS.includes(view);
+  const { members, reload: reloadMembers } = useMembers(
+    ['equipo', 'miembros'].includes(view) || teamCtx);
+  const { teams, reload: reloadTeams } = useTeams(view === 'equipo' || teamCtx);
 
   // URL → state: initial load + back/forward.
   useEffect(() => {
@@ -125,7 +136,7 @@ export default function App() {
       setView(s.view || 'home');
       setAppName(s.appName || null);
       setComponentName(s.componentName || null);
-      setTeamName(s.teamName || null);
+      setTeamId(s.teamId || null);
       setReleaseNo(s.releaseNo || null);
     };
     apply();
@@ -135,12 +146,13 @@ export default function App() {
 
   // state → URL.
   useEffect(() => {
-    const path = pathFor({ view, appName, componentName, teamName, releaseNo });
+    const path = pathFor({ view, appName, componentName, teamId, releaseNo });
     if (window.location.pathname !== path)
       window.history.pushState(null, '', path);
-  }, [view, appName, componentName, teamName, releaseNo]);
+  }, [view, appName, componentName, teamId, releaseNo]);
 
   const appCtx = appName && APP_VIEWS.includes(view);
+  const team = teams.find((t) => String(t.id) === String(teamId));
   const { releases, reload: reloadReleases } = useReleases(view === 'releases');
 
   if (me === undefined) return <CenterCard title="Ensemble" sub="Cargando…" />;
@@ -155,6 +167,7 @@ export default function App() {
     'release-detail': 'Releases / Detalle',
     'app-detail': 'Aplicaciones / Detalle',
     'team-detail': 'Equipos / Detalle',
+    'team-members': 'Equipos / Miembros del equipo',
     'component-detail': 'Componentes / Detalles del componente',
   };
   const viewLabel = view === 'home'
@@ -216,10 +229,14 @@ export default function App() {
               <a onClick={() => setView('aplicaciones')}>Aplicaciones</a>
               <span className="sep">/</span><span>{appName}</span>
             </>
-          ) : view === 'team-detail' ? (
+          ) : teamCtx ? (
             <>
-              <a onClick={() => setView('equipo')}>Equipos</a>
-              <span className="sep">/</span><span>{teamName}</span>
+              <a onClick={() => { setView('equipo'); setTeamId(null); }}>Equipos</a>
+              <span className="sep">/</span>
+              <a onClick={() => setView('team-detail')}>{team?.name || teamId}</a>
+              {view === 'team-members' && (
+                <><span className="sep">/</span><span>Miembros del equipo</span></>
+              )}
             </>
           ) : view === 'component-detail' ? (
             <>
@@ -234,7 +251,15 @@ export default function App() {
       <div className="layout">
         {view !== 'home' && (
           <nav className={`sidebar${collapsed ? ' collapsed' : ''}`}>
-            {(appCtx ? APP_NAV : SIDEBAR.map((id) => NAV.find((n) => n.id === id)))
+            {teamCtx && (
+              <a className="sidebar-back"
+                onClick={() => { setView('equipo'); setTeamId(null); }}>
+                ‹ {!collapsed && 'Volver'}
+              </a>
+            )}
+            {(teamCtx ? TEAM_NAV
+              : appCtx ? APP_NAV
+              : SIDEBAR.map((id) => NAV.find((n) => n.id === id)))
               .map((n) => (
               <a key={n.id}
                  className={view === n.id
@@ -336,11 +361,15 @@ export default function App() {
 
           {view === 'equipo' && (
             <TeamsView teams={teams} members={members} onChanged={reloadTeams}
-              onOpen={(n) => { setTeamName(n); setView('team-detail'); }} />
+              onOpen={(id) => { setTeamId(id); setView('team-detail'); }} />
           )}
 
           {view === 'team-detail' && (
-            <TeamDetail name={teamName} />
+            <TeamDetail id={teamId} />
+          )}
+
+          {view === 'team-members' && (
+            <TeamMembers id={teamId} members={members} />
           )}
 
           {view === 'miembros' && (
