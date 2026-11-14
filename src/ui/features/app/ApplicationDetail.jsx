@@ -84,7 +84,8 @@ export default function ApplicationDetail({ name, onGoMembers }) {
             <label>Responsables de Aplicación <span className="badge">{ams.length}</span></label>
             <div className="owner-chips">
               {ams.map((am) => (
-                <span key={am.github_username} className="owner-chip" title={am.role}>
+                <span key={am.github_username} className="owner-chip"
+                  title={(am.roles || []).join(' · ')}>
                   <span className="avatar">
                     {initials(am.members?.full_name || am.github_username)}
                   </span>
