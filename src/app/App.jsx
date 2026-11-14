@@ -186,7 +186,7 @@ export default function App() {
         <div className="crumbs">
           <a href="/ensemble">⌂</a><span className="sep">/</span>
           <a onClick={() => setView('home')}>Compañías</a><span className="sep">/</span>
-          <a onClick={() => setView('aplicacion')}>Personal</a>
+          <a onClick={() => setView('aplicaciones')}>Personal</a>
           <span className="sep">/</span>
           {appCtx ? (
             <>
@@ -286,6 +286,8 @@ export default function App() {
               onOpen={(n) => { setAppName(n); setView('app-detail'); }} />
           )}
 
+          {/* Platform card kept but unlinked — reachable only by direct
+              /ensemble/personal while we decide whether to drop it. */}
           {view === 'aplicacion' && (
             <ApplicationView manifest={manifest} />
           )}
