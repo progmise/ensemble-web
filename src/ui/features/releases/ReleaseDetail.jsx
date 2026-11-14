@@ -5,7 +5,7 @@ import { Ico, ICON, GhIcon } from '../../components/Icons.jsx';
 
 const dateOnly = (iso) => (iso ? new Date(`${iso}`.slice(0, 10)).toLocaleDateString() : '—');
 
-// Stepper — Ensemble's Nuevo→Certificación→Pre Producción→Producción→Cerrado,
+// Stepper — Nuevo→Certificación→Pre Producción→Producción→Cerrado,
 // mapped to our lifecycle: created → draft published → non-pro deployed →
 // pro deployed → every environment succeeded.
 const envDone = (rel, env) =>
@@ -32,7 +32,7 @@ const deployState = (rel, env) =>
 
 const RUNNING = new Set(['dispatched', 'queued', 'in_progress', 'requested']);
 
-// Trails — Ensemble's per-environment task sub-table, synthesized from our own
+// Trails — per-environment task sub-table, synthesized from our own
 // lifecycle: publish approval (Certification) + the env's deploy dispatch.
 const trailsFor = (rel, env, order) => {
   const trails = [];

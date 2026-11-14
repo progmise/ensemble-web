@@ -8,7 +8,7 @@ const initials = (s = '') =>
   (s.split(/[\s-_]+/).map((w) => w[0]).join('') || s || '?').slice(0, 2).toUpperCase();
 const OWNER_ROLES = ['technical-lead', 'product-owner'];
 
-// Ensemble-style application detail — two-pane card: identity on the left,
+// Component detail — two-pane card: identity on the left,
 // metadata / owners / work tools on the right.
 export default function ComponentDetail({ name, templates = [], manifest, onChanged }) {
   const [row, setRow] = useState(null);

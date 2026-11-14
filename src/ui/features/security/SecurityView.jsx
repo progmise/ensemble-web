@@ -5,7 +5,7 @@ import Select from '../../components/Select.jsx';
 const ENV_LABEL = { cert: 'Certification', pre: 'Preproduction', pro: 'Production' };
 const NAME_RE = /^[A-Z_][A-Z0-9_]*$/;
 
-// Ensemble "Seguridad → Secretos" — platform secret registry. Values are
+// "Seguridad → Secretos" — platform secret registry. Values are
 // write-only (loaded here, never read back); the allowed environments come
 // from the session (`me.secret_envs`) — developer: cert/pre only.
 export default function SecurityView({ me }) {
@@ -56,7 +56,6 @@ export default function SecurityView({ me }) {
           <span>Filtrar secreto</span>
           <input value={q} placeholder="Filtrar por nombre"
             onChange={(e) => setQ(e.target.value)} />
-          <small className="muted">Filtrar por nombre de secreto</small>
         </label>
         <button className="btn btn-primary sec-new"
           onClick={() => setModal({})}>Nuevo Secreto +</button>
@@ -76,7 +75,7 @@ export default function SecurityView({ me }) {
               <td><code>{s.name}</code></td>
               <td className="td-actions">
                 <button className="btn-text" title="Rotar valor"
-                  onClick={() => setModal({ edit: s.name })}>✎</button>
+                  onClick={() => setModal({ edit: s })}>✎</button>
               </td>
             </tr>
           ))}
@@ -95,25 +94,41 @@ export default function SecurityView({ me }) {
   );
 }
 
-// Two-step modal: 1) name + environment + value (write-only) — 2) summary
-// with the vault path. Values are never echoed back after saving.
+// Two-step modal: 1) applicativo (Nombre del Secreto) + environment +
+// clave/valor entries (write-only) — 2) summary with the vault path.
+// One secret = one applicativo holding N entries; the server merges them
+// into the stored map, so blank edit rows keep their existing values.
 function SecretModal({ env, envOptions, edit, onClose, onSaved }) {
   const [step, setStep] = useState(1);
-  const [name, setName] = useState(edit || '');
+  const [name, setName] = useState(edit?.name || '');
   const [environment, setEnvironment] = useState(env);
-  const [value, setValue] = useState('');
-  const [show, setShow] = useState(false);
+  const [entries, setEntries] = useState(
+    (edit?.keys || []).map((key) => ({ key, value: '', show: false }))
+      .concat([{ key: '', value: '', show: false }]));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
 
   const norm = name.trim().toUpperCase();
-  const ok = NAME_RE.test(norm) && value.length > 0;
+  const touched = entries.filter((e) => e.key.trim() || e.value);
+  const keys = touched.map((e) => e.key.trim().toUpperCase());
+  const payload = Object.fromEntries(touched
+    .filter((e) => NAME_RE.test(e.key.trim().toUpperCase()) && e.value)
+    .map((e) => [e.key.trim().toUpperCase(), e.value]));
+  const bad = touched.some(
+    (e) => !NAME_RE.test(e.key.trim().toUpperCase()) || !e.value)
+    || new Set(keys).size !== keys.length;
+  const ok = NAME_RE.test(norm) && Object.keys(payload).length > 0 && !bad;
+
+  const setEntry = (i, patch) =>
+    setEntries((es) => es.map((e, j) => (j === i ? { ...e, ...patch } : e)));
+  const addEntry = () =>
+    setEntries((es) => [...es, { key: '', value: '', show: false }]);
 
   const save = async () => {
     setBusy(true);
     setError(null);
     try {
-      await putSecret({ name: norm, environment, value });
+      await putSecret({ name: norm, environment, entries: payload });
       onSaved?.();
       onClose();
     } catch (e) {
@@ -135,9 +150,9 @@ function SecretModal({ env, envOptions, edit, onClose, onSaved }) {
           <div className="form">
             <label className="field">
               <span>Nombre del Secreto *</span>
-              <input value={name} placeholder="REDIS_PASSWORD" disabled={Boolean(edit)}
+              <input value={name} placeholder="Ingresa el nombre del secreto" disabled={Boolean(edit)}
                 onChange={(e) => setName(e.target.value.toUpperCase())} />
-              <small className="muted">Nombre de la variable de entorno (mayúsculas)</small>
+              <small className="muted">Nombre del aplicativo (mayúsculas)</small>
             </label>
             <label className="field">
               <span>Tipo de Secreto</span>
@@ -149,17 +164,34 @@ function SecretModal({ env, envOptions, edit, onClose, onSaved }) {
               <span>Entorno *</span>
               <Select value={environment} options={envOptions} onChange={setEnvironment} />
             </label>
-            <label className="field">
-              <span>Valor *</span>
-              <span className="secret-value">
-                <input type={show ? 'text' : 'password'} value={value}
-                  autoComplete="off" placeholder="••••••••"
-                  onChange={(e) => setValue(e.target.value)} />
-                <button type="button" className="btn btn-outline"
-                  onClick={() => setShow((s) => !s)}>{show ? '🙈' : '👁'}</button>
-              </span>
-              <small className="muted">Write-only — no se puede leer después de guardar</small>
-            </label>
+            {entries.map((e, i) => (
+              <div className="sec-pair" key={i}>
+                <label className="field">
+                  <span>Clave *</span>
+                  <input value={e.key} placeholder="Ingresa el nombre de la clave"
+                    onChange={(ev) => setEntry(i, { key: ev.target.value.toUpperCase() })} />
+                </label>
+                <label className="field">
+                  <span>Valor *</span>
+                  <span className="secret-value">
+                    <input type={e.show ? 'text' : 'password'} value={e.value}
+                      autoComplete="off" placeholder="••••••••"
+                      onChange={(ev) => setEntry(i, { value: ev.target.value })} />
+                    <button type="button" className="btn btn-outline"
+                      onClick={() => setEntry(i, { show: !e.show })}>
+                      {e.show ? '🙈' : '👁'}
+                    </button>
+                  </span>
+                </label>
+              </div>
+            ))}
+            <button type="button" className="btn btn-primary sec-add"
+              title="Agregar clave" onClick={addEntry}>+</button>
+            <small className="muted">
+              Write-only — {edit
+                ? 'las claves en blanco conservan su valor actual'
+                : 'no se pueden leer después de guardar'}
+            </small>
           </div>
         )}
         {step === 2 && (
@@ -168,6 +200,8 @@ function SecretModal({ env, envOptions, edit, onClose, onSaved }) {
             <div className="sec-summary">
               <span>Nombre de la ruta:</span>
               <code>/progmise/{environment}/application/{norm}</code>
+              <span>Claves:</span>
+              <code>{Object.keys(payload).join(', ')}</code>
             </div>
           </div>
         )}

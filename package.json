@@ -1,5 +1,5 @@
 {
-  "name": "deploy-orchestrator",
+  "name": "ensemble-web",
   "private": false,
   "version": "1.7.0",
   "type": "module",

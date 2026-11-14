@@ -13,9 +13,13 @@ const STEPS = [
 
 const KIND_BADGE = { lib: 'LIB', cm: 'CM' };
 
-export default function ComponentWizard({ template, components = [], onClose, onBack, onCreated }) {
+export default function ComponentWizard({ template, components = [],
+  applications = [], defaultApplication = '', onClose, onBack, onCreated }) {
   const [step, setStep] = useState(0);
-  const [form, setForm] = useState({ name: '', shortname: '', repo: '', description: '' });
+  const [form, setForm] = useState({
+    name: '', shortname: '', repo: '', description: '',
+    application: defaultApplication || '',
+  });
   const [config, setConfig] = useState(() => defaultConfig(template.fields));
   const [repoTouched, setRepoTouched] = useState(false);
   const [shortTouched, setShortTouched] = useState(false);
@@ -26,8 +30,13 @@ export default function ComponentWizard({ template, components = [], onClose, on
   const setField = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const repoName = repoTouched ? form.repo : form.name;
   const shortname = shortTouched ? form.shortname : shortnameFor(form.name);
+  // The repo gets the application prefix — `{repo_prefix}-{name}`.
+  // `repo_prefix` sets the repo prefix for new components; defaults to the app name.
+  const app = applications.find((a) => a.name === form.application);
+  const repoPrefix = app ? (app.repo_prefix || app.name) : '';
+  const fullRepo = repoPrefix && repoName ? `${repoPrefix}-${repoName}` : repoName;
   const nameOk = NAME_RE.test(form.name);
-  const repoOk = REPO_RE.test(repoName);
+  const repoOk = REPO_RE.test(fullRepo);
   const shortOk = SHORTNAME_RE.test(shortname);
   const descOk = form.description.trim().length > 0;
   const fieldsOk = (template.fields || [])
@@ -38,7 +47,7 @@ export default function ComponentWizard({ template, components = [], onClose, on
     setError(null);
     try {
       const c = await createComponent({
-        ...form, shortname, repo: repoName, template: template.name, config,
+        ...form, shortname, repo: fullRepo, template: template.name, config,
       });
       setResult(c);
       onCreated?.(c);
@@ -109,10 +118,25 @@ export default function ComponentWizard({ template, components = [], onClose, on
                   <small className="muted">Descripción funcional del componente</small>
                 </label>
                 <label className="field">
+                  <span>Aplicación</span>
+                  <select value={form.application}
+                    onChange={(e) => setField('application', e.target.value)}>
+                    <option value="">Sin aplicación</option>
+                    {applications.map((a) => (
+                      <option key={a.name} value={a.name}>{a.name}</option>
+                    ))}
+                  </select>
+                  <small className="muted">Agrupa el componente bajo un aplicativo — prefija el repositorio</small>
+                </label>
+                <label className="field">
                   <span>Nombre del repositorio *</span>
-                  <input value={repoName} placeholder="ejemplo: mi-repositorio"
-                    onChange={(e) => { setRepoTouched(true); setField('repo', e.target.value); }} />
-                  <small className="muted">progmise/{repoName || '…'} — nombre único del repositorio</small>
+                  <span className="repo-wrap">
+                    {repoPrefix && <span className="repo-prefix">{repoPrefix}-</span>}
+                    <input value={repoName} placeholder="ejemplo: mi-repositorio"
+                      className={repoPrefix ? 'prefixed' : ''}
+                      onChange={(e) => { setRepoTouched(true); setField('repo', e.target.value); }} />
+                  </span>
+                  <small className="muted">progmise/{fullRepo || '…'} — nombre único del repositorio</small>
                 </label>
               </div>
             )}
@@ -157,7 +181,7 @@ export default function ComponentWizard({ template, components = [], onClose, on
                     <tr><td>Nombre de componente:</td><td><strong>{form.name}</strong></td></tr>
                     <tr><td>Introduzca un nombre corto para el componente:</td><td><code>{shortname}</code></td></tr>
                     <tr><td>Descripción:</td><td>{form.description}</td></tr>
-                    <tr><td>Nombre del repositorio:</td><td>progmise/{repoName}</td></tr>
+                    <tr><td>Nombre del repositorio:</td><td>progmise/{fullRepo}</td></tr>
                     {(template.fields || []).map((f) => (
                       <tr key={f.key}>
                         <td>{f.label}:</td>

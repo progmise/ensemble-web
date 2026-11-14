@@ -1,8 +1,8 @@
 # AGENTS.md
 
-Guide for working on **deploy-orchestrator** — the progmise release
+Guide for working on **ensemble-web** — the progmise release
 orchestration dashboard (React + Vite SPA with a thin Express server that
-serves `dist/` and proxies `/api/*` to `deploy-orchestrator-api` — OAuth and
+serves `dist/` and proxies `/api/*` to `ensemble-api` — OAuth and
 all business logic live there).
 
 ## Architecture
@@ -42,7 +42,7 @@ src/
       app/ApplicationView.jsx   platform detail card (deploy-manifest) —
                                 first sidebar item / landing view
       releases/ReleasesView.jsx, ReleaseDetail.jsx
-      components/            ComponentsTable, ComponentDetail (Ensemble-style
+      components/            ComponentsTable, ComponentDetail (
                              app card), ComponentRuns,
                              DependencyGraph (mermaid), FiltersMenu,
                              ComponentWizard — 4 steps; "Personalización"
@@ -65,12 +65,12 @@ src/
       team/MembersView.jsx   member registry + roles
       deployments/OrchRuns.jsx
 server/index.js              Express — serves dist/ + proxies ALL /api/* to
-                             deploy-orchestrator-api (API_UPSTREAM)
+                             ensemble-api (API_UPSTREAM)
 ```
 
 Rules:
 - All API access is same-origin `/api/*` (`vite.config.js` proxies to the API
-  in dev). No tokens in the browser — OAuth lives in `deploy-orchestrator-api`,
+  in dev). No tokens in the browser — OAuth lives in `ensemble-api`,
   the session rides in an HttpOnly cookie.
 - Any 401 from `infrastructure/api/client.js` fires `auth:required`; the app
   drops back to the login screen.

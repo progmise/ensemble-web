@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: '/',
+  base: '/ensemble/',
   // Dev: /api/* proxies to the local API — same-origin like prod, so the
   // session cookie stays SameSite=Lax and no CORS is needed.
   server: {

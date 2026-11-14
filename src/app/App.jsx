@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSession } from '../application/useSession.js';
 import { useDashboardData } from '../application/useDashboardData.js';
 import { filter } from '../domain/component.js';
@@ -11,96 +11,248 @@ import { useReleases } from '../application/useReleases.js';
 import ComponentsTable from '../ui/features/components/ComponentsTable.jsx';
 import ComponentDetail from '../ui/features/components/ComponentDetail.jsx';
 import ApplicationView from '../ui/features/app/ApplicationView.jsx';
+import ApplicationsView from '../ui/features/app/ApplicationsView.jsx';
+import ApplicationDetail from '../ui/features/app/ApplicationDetail.jsx';
+import HomeView from '../ui/features/app/HomeView.jsx';
 import FiltersMenu from '../ui/features/components/FiltersMenu.jsx';
 import DependencyGraph from '../ui/features/components/DependencyGraph.jsx';
 import ComponentWizard from '../ui/features/components/ComponentWizard.jsx';
 import TemplateGallery from '../ui/features/components/TemplateGallery.jsx';
 import OrchRuns from '../ui/features/deployments/OrchRuns.jsx';
 import MembersView from '../ui/features/team/MembersView.jsx';
+import TeamsView from '../ui/features/team/TeamsView.jsx';
+import TeamDetail from '../ui/features/team/TeamDetail.jsx';
 import SecurityView from '../ui/features/security/SecurityView.jsx';
 import { useMembers } from '../application/useMembers.js';
+import { useTeams } from '../application/useTeams.js';
 
 const NAV = [
+  { id: 'home', label: 'Inicio', icon: ICON.home },
+  { id: 'aplicaciones', label: 'Aplicaciones', icon: ICON.componentes },
   { id: 'aplicacion', label: 'Aplicación', icon: ICON.logo },
   { id: 'componentes', label: 'Componentes', icon: ICON.componentes },
-  { id: 'equipo', label: 'Equipo', icon: ICON.equipo },
+  { id: 'equipo', label: 'Equipos', icon: ICON.equipo },
+  { id: 'miembros', label: 'Miembros', icon: ICON.equipo },
   { id: 'seguridad', label: 'Seguridad', icon: ICON.seguridad },
   { id: 'despliegues', label: 'Despliegues', icon: ICON.despliegues },
   { id: 'releases', label: 'Releases', icon: ICON.releases },
 ];
 
+// Sidebar — top level shows only the settled sections; inside an
+// application the sidebar switches to the app-scoped nav.
+const SIDEBAR = ['aplicaciones', 'equipo'];
+const APP_NAV = [
+  { id: 'app-detail', label: 'Aplicación', icon: ICON.logo },
+  { id: 'app-components', label: 'Componentes', icon: ICON.componentes },
+];
+const APP_VIEWS = ['app-detail', 'app-components', 'component-detail', 'nuevo-componente'];
+
+// URL routing — /ensemble/<slug>[/<app>/componentes[/<id|nuevo>]].
+const SLUG_TOP = {
+  home: '', aplicaciones: 'aplicaciones', aplicacion: 'personal',
+  componentes: 'componentes', equipo: 'equipo', miembros: 'miembros',
+  seguridad: 'seguridad', despliegues: 'despliegues', releases: 'releases',
+};
+const enc = encodeURIComponent;
+
+const pathFor = ({ view, appName, componentName, teamName, releaseNo }) => {
+  if (view === 'app-detail') return `/ensemble/aplicaciones/${enc(appName)}`;
+  if (view === 'app-components')
+    return `/ensemble/aplicaciones/${enc(appName)}/componentes`;
+  if (view === 'component-detail')
+    return appName
+      ? `/ensemble/aplicaciones/${enc(appName)}/componentes/${enc(componentName)}`
+      : `/ensemble/componentes/${enc(componentName)}`;
+  if (view === 'nuevo-componente')
+    return appName
+      ? `/ensemble/aplicaciones/${enc(appName)}/componentes/nuevo`
+      : '/ensemble/componentes/nuevo';
+  if (view === 'team-detail') return `/ensemble/equipo/${enc(teamName)}`;
+  if (view === 'release-detail') return `/ensemble/releases/${releaseNo}`;
+  return `/ensemble/${SLUG_TOP[view] || ''}`;
+};
+
+const parsePath = () => {
+  const seg = window.location.pathname.replace(/^\/ensemble\/?/, '')
+    .split('/').filter(Boolean).map(decodeURIComponent);
+  if (seg[0] === 'aplicaciones' && seg[1]) {
+    if (seg[2] === 'componentes' && seg[3] === 'nuevo')
+      return { view: 'nuevo-componente', appName: seg[1] };
+    if (seg[2] === 'componentes' && seg[3])
+      return { view: 'component-detail', appName: seg[1], componentName: seg[3] };
+    if (seg[2] === 'componentes')
+      return { view: 'app-components', appName: seg[1] };
+    return { view: 'app-detail', appName: seg[1] };
+  }
+  if (seg[0] === 'componentes') {
+    if (seg[1] === 'nuevo') return { view: 'nuevo-componente' };
+    if (seg[1]) return { view: 'component-detail', componentName: seg[1] };
+    return { view: 'componentes' };
+  }
+  if (seg[0] === 'equipo' && seg[1]) return { view: 'team-detail', teamName: seg[1] };
+  if (seg[0] === 'releases' && seg[1]) return { view: 'release-detail', releaseNo: seg[1] };
+  const view = Object.keys(SLUG_TOP).find((v) => SLUG_TOP[v] === seg[0]) || 'home';
+  return { view };
+};
+
+// ☰ menu groups (home view only — inner views keep the sidebar)
+const MENU = [
+  { title: null, items: ['home'] },
+  { title: 'Gestión', items: ['aplicaciones'] },
+];
+
 export default function App() {
   const me = useSession();
-  const { manifest, runs, deployments, catalog, templates, error,
-    reloadCatalog, reloadTemplates } = useDashboardData(me);
+  const { manifest, runs, deployments, catalog, templates, applications, error,
+    reloadCatalog, reloadTemplates, reloadApplications } = useDashboardData(me);
   const [wizardTemplate, setWizardTemplate] = useState(null);
-  const [view, setView] = useState('aplicacion');
+  const [view, setView] = useState('home');
   const [releaseNo, setReleaseNo] = useState(null);
   const [componentName, setComponentName] = useState(null);
+  const [appName, setAppName] = useState(null);
+  const [teamName, setTeamName] = useState(null);
   const [q, setQ] = useState('');
   const [filters, setFilters] = useState({ plantilla: '', estado: '' });
   const [collapsed, setCollapsed] = useState(false);
-  const { members, reload: reloadMembers } = useMembers(view === 'equipo');
+  const [menu, setMenu] = useState(false);
+  const { members, reload: reloadMembers } = useMembers(view === 'equipo' || view === 'miembros');
+  const { teams, reload: reloadTeams } = useTeams(view === 'equipo');
+
+  // URL → state: initial load + back/forward.
+  useEffect(() => {
+    const apply = () => {
+      const s = parsePath();
+      setView(s.view || 'home');
+      setAppName(s.appName || null);
+      setComponentName(s.componentName || null);
+      setTeamName(s.teamName || null);
+      setReleaseNo(s.releaseNo || null);
+    };
+    apply();
+    window.addEventListener('popstate', apply);
+    return () => window.removeEventListener('popstate', apply);
+  }, []);
+
+  // state → URL.
+  useEffect(() => {
+    const path = pathFor({ view, appName, componentName, teamName, releaseNo });
+    if (window.location.pathname !== path)
+      window.history.pushState(null, '', path);
+  }, [view, appName, componentName, teamName, releaseNo]);
+
+  const appCtx = appName && APP_VIEWS.includes(view);
   const { releases, reload: reloadReleases } = useReleases(view === 'releases');
 
-  if (me === undefined) return <CenterCard title="Deploy Orchestrator" sub="Cargando…" />;
+  if (me === undefined) return <CenterCard title="Ensemble" sub="Cargando…" />;
   if (me?.forbidden) return <Unauthorized />;
   if (!me) return <Login />;
-  if (error) return <CenterCard title="Deploy Orchestrator" sub={error} />;
-  if (!manifest) return <CenterCard title="Deploy Orchestrator" sub="Cargando…" />;
+  if (error) return <CenterCard title="Ensemble" sub={error} />;
+  if (!manifest) return <CenterCard title="Ensemble" sub="Cargando…" />;
 
-  const viewLabel = view === 'nuevo-componente'
-    ? 'Componentes / Nuevo componente'
-    : view === 'release-detail'
-      ? 'Releases / Detalle'
-      : view === 'component-detail'
-        ? 'Componentes / Detalles del componente'
-      : NAV.find((n) => n.id === view)?.label || '';
+  const detailLabels = {
+    'app-components': 'Componentes',
+    'nuevo-componente': 'Componentes / Nuevo componente',
+    'release-detail': 'Releases / Detalle',
+    'app-detail': 'Aplicaciones / Detalle',
+    'team-detail': 'Equipos / Detalle',
+    'component-detail': 'Componentes / Detalles del componente',
+  };
+  const viewLabel = view === 'home'
+    ? 'Ensemble'
+    : detailLabels[view] || NAV.find((n) => n.id === view)?.label || '';
   const lower = q.toLowerCase();
+  const appComponentNames = appCtx
+    ? catalog.filter((c) => c.application === appName).map((c) => c.name) : [];
+  const appManifest = appCtx ? {
+    ...manifest,
+    components: (manifest.components || [])
+      .filter((c) => appComponentNames.includes(c.name)),
+  } : manifest;
 
   return (
     <>
       <div className="topbar">
         <span className="logo">
           <Ico d={ICON.logo} />
-          ORCHESTRATOR
+          ENSEMBLE
         </span>
-        <span className="title">{viewLabel}</span>
-        <UserMenu user={me} />
-      </div>
-      <div className="crumbs">
-        <a href="/">⌂</a><span className="sep">/</span>
-        <a href="/">progmise</a><span className="sep">/</span>
-        <a href="https://github.com/progmise/deploy-manifest" target="_blank" rel="noreferrer">deploy-manifest</a>
-        <span className="sep">/</span>
-        {view === 'release-detail' ? (
-          <>
-            <a onClick={() => { setView('releases'); reloadReleases(); }}>Releases</a>
-            <span className="sep">/</span><span>Detalle</span>
-          </>
-        ) : view === 'component-detail' ? (
-          <>
-            <a onClick={() => { setView('componentes'); setQ(''); }}>Componentes</a>
-            <span className="sep">/</span><span>{componentName}</span>
-          </>
-        ) : (
-          <span>{viewLabel}</span>
+        <span className="title">{view === 'home' ? '' : viewLabel}</span>
+        {view === 'home' && (
+          <button className="menu-btn" title="Menú" onClick={() => setMenu(true)}>☰</button>
         )}
-        <span className="muted" style={{ marginLeft: 'auto' }}>
-          release <code>v{manifest.version}</code>
-        </span>
+        <UserMenu me={me} />
       </div>
+      {view !== 'home' && (
+        <div className="crumbs">
+          <a href="/ensemble">⌂</a><span className="sep">/</span>
+          <a onClick={() => setView('home')}>Compañías</a><span className="sep">/</span>
+          <a onClick={() => setView('aplicacion')}>Personal</a>
+          <span className="sep">/</span>
+          {appCtx ? (
+            <>
+              <a onClick={() => setView('aplicaciones')}>Aplicaciones</a>
+              <span className="sep">/</span>
+              <a onClick={() => setView('app-detail')}>{appName}</a>
+              {view !== 'app-detail' && (
+                <>
+                  <span className="sep">/</span>
+                  <a onClick={() => setView('app-components')}>Componentes</a>
+                  {view === 'component-detail' && (
+                    <><span className="sep">/</span><span>{componentName}</span></>
+                  )}
+                  {view === 'nuevo-componente' && (
+                    <><span className="sep">/</span><span>Nuevo componente</span></>
+                  )}
+                </>
+              )}
+            </>
+          ) : view === 'release-detail' ? (
+            <>
+              <a onClick={() => { setView('releases'); reloadReleases(); }}>Releases</a>
+              <span className="sep">/</span><span>Detalle</span>
+            </>
+          ) : view === 'app-detail' ? (
+            <>
+              <a onClick={() => setView('aplicaciones')}>Aplicaciones</a>
+              <span className="sep">/</span><span>{appName}</span>
+            </>
+          ) : view === 'team-detail' ? (
+            <>
+              <a onClick={() => setView('equipo')}>Equipos</a>
+              <span className="sep">/</span><span>{teamName}</span>
+            </>
+          ) : view === 'component-detail' ? (
+            <>
+              <a onClick={() => { setView('componentes'); setQ(''); }}>Componentes</a>
+              <span className="sep">/</span><span>{componentName}</span>
+            </>
+          ) : (
+            <span>{viewLabel}</span>
+          )}
+          <span className="muted" style={{ marginLeft: 'auto' }}>
+            release <code>v{manifest.version}</code>
+          </span>
+        </div>
+      )}
       <div className="layout">
-        <nav className={`sidebar${collapsed ? ' collapsed' : ''}`}>
-          {NAV.map((n) => (
-            <a key={n.id} className={view === n.id ? 'active' : ''} title={n.label}
-               onClick={() => { setView(n.id); setQ(''); }}>
-              <Ico d={n.icon} />{!collapsed && n.label}
-            </a>
-          ))}
-          <button className="sidebar-toggle" onClick={() => setCollapsed((c) => !c)}
-            title={collapsed ? 'Expandir' : 'Colapsar'}>{collapsed ? '›' : '‹'}</button>
-        </nav>
+        {view !== 'home' && (
+          <nav className={`sidebar${collapsed ? ' collapsed' : ''}`}>
+            {(appCtx ? APP_NAV : SIDEBAR.map((id) => NAV.find((n) => n.id === id)))
+              .map((n) => (
+              <a key={n.id}
+                 className={view === n.id
+                   || (n.id === 'app-components'
+                     && ['component-detail', 'nuevo-componente'].includes(view))
+                   ? 'active' : ''}
+                 title={n.label}
+                 onClick={() => { setView(n.id); setQ(''); }}>
+                <Ico d={n.icon} />{!collapsed && n.label}
+              </a>
+            ))}
+            <button className="sidebar-toggle" onClick={() => setCollapsed((c) => !c)}
+              title={collapsed ? 'Expandir' : 'Colapsar'}>{collapsed ? '›' : '‹'}</button>
+          </nav>
+        )}
         <div className="content">
 
           {view === 'releases' && (
@@ -117,8 +269,45 @@ export default function App() {
               manifest={manifest} onChanged={reloadCatalog} />
           )}
 
+          {view === 'aplicaciones' && (
+            <ApplicationsView applications={applications} catalog={catalog}
+              onChanged={reloadApplications}
+              onOpen={(n) => { setAppName(n); setView('app-detail'); }} />
+          )}
+
+          {view === 'app-detail' && (
+            <ApplicationDetail name={appName}
+              onOpenComponent={(n) => { setComponentName(n); setView('component-detail'); }}
+              onNewComponent={() => setView('nuevo-componente')} />
+          )}
+
+          {view === 'home' && (
+            <HomeView me={me} applications={applications}
+              onOpen={(n) => { setAppName(n); setView('app-detail'); }} />
+          )}
+
           {view === 'aplicacion' && (
             <ApplicationView manifest={manifest} />
+          )}
+
+          {view === 'app-components' && (
+            <div className="card">
+              <h2>Buscar componente</h2>
+              <SearchRow q={q} setQ={setQ} placeholder="Mi componente favorito"
+                action={
+                  <>
+                    <FiltersMenu templates={templates} filters={filters} setFilters={setFilters} />
+                    <button className="btn btn-primary" style={{ marginLeft: 'auto' }}
+                      onClick={() => { setView('nuevo-componente'); setQ(''); }}>Nuevo componente +</button>
+                  </>
+                } />
+              <p className="muted" style={{ fontSize: 12, margin: '-8px 0 14px' }}>
+                Buscar por nombre, nombre corto o plantilla</p>
+              <ComponentsTable manifest={appManifest}
+                catalog={catalog.filter((c) => c.application === appName)}
+                templates={templates} q={lower} filters={filters} onChanged={reloadCatalog}
+                onOpen={(n) => { setComponentName(n); setView('component-detail'); setQ(''); }} />
+            </div>
           )}
 
           {view === 'componentes' && (
@@ -147,6 +336,15 @@ export default function App() {
           )}
 
           {view === 'equipo' && (
+            <TeamsView teams={teams} members={members} onChanged={reloadTeams}
+              onOpen={(n) => { setTeamName(n); setView('team-detail'); }} />
+          )}
+
+          {view === 'team-detail' && (
+            <TeamDetail name={teamName} />
+          )}
+
+          {view === 'miembros' && (
             <MembersView members={members} onChanged={reloadMembers} />
           )}
 
@@ -170,8 +368,51 @@ export default function App() {
 
         </div>
       </div>
+      <footer className="footer">
+        <span className="footer-links">
+          <span>progmise</span>
+          <span className="footer-sep">|</span>
+          <span>v{manifest.version}</span>
+          {['localhost', '127.0.0.1'].includes(window.location.hostname) && (
+            <><span className="footer-sep">|</span><span>Entorno local</span></>
+          )}
+        </span>
+        <span className="footer-links">
+          <a href="/api/health" target="_blank" rel="noreferrer">Estado del sistema</a>
+          <span className="footer-sep">|</span>
+          <a href="https://github.com/progmise/deploy-manifest#readme"
+            target="_blank" rel="noreferrer">Documentación</a>
+          <span className="footer-sep">|</span>
+          <a href="https://github.com/progmise/ensemble-web/issues"
+            target="_blank" rel="noreferrer">Reportar un problema</a>
+        </span>
+      </footer>
+      {menu && (
+        <>
+          <div className="menu-overlay" onClick={() => setMenu(false)} />
+          <nav className="menu-pop">
+            {MENU.map((sec, i) => (
+              <div key={i} className="menu-sec">
+                {sec.title && <span className="menu-sec-title">{sec.title}</span>}
+                {sec.items.map((id) => {
+                  const n = NAV.find((x) => x.id === id);
+                  return (
+                    <a key={n.id}
+                       onClick={() => { setView(n.id); setQ(''); setMenu(false); }}>
+                      <Ico d={n.icon} />
+                      {n.id === 'home' ? 'Página principal Ensemble' : n.label}
+                    </a>
+                  );
+                })}
+              </div>
+            ))}
+          </nav>
+        </>
+      )}
       {wizardTemplate && (
         <ComponentWizard template={wizardTemplate}
+          applications={applications}
+          defaultApplication={appName}
           components={(manifest.components || [])
             .filter((c) => !c.type || c.type === 'app').map((c) => c.name)}
           onClose={() => setWizardTemplate(null)}

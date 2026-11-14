@@ -39,6 +39,32 @@ export function createMember(body) {
   return apiSend('/api/members', 'POST', body);
 }
 
+// Application registry — groups related components under one app.
+export function getApplications() {
+  return apiGet('/api/applications');
+}
+
+export function createApplication(body) {
+  return apiSend('/api/applications', 'POST', body);
+}
+
+export function getApplication(name) {
+  return apiGet(`/api/applications/${encodeURIComponent(name)}`);
+}
+
+// Team registry — groups of members owning functionality areas.
+export function getTeams() {
+  return apiGet('/api/teams');
+}
+
+export function createTeam(body) {
+  return apiSend('/api/teams', 'POST', body);
+}
+
+export function getTeam(name) {
+  return apiGet(`/api/teams/${encodeURIComponent(name)}`);
+}
+
 // Release registry — RLSE records backed by the API; publish/deploy run
 // server-side (the browser never touches GitHub for them).
 export function getReleases() {
@@ -70,8 +96,9 @@ export function getDeployments() {
   return apiGet('/api/deployments');
 }
 
-// Application secrets registry (Seguridad view) — names only; values are
-// write-only via POST. Environment access is role-gated server-side.
+// Application secrets registry (Seguridad view) — applicativo names + entry
+// keys only; values are write-only via POST ({name, environment, entries}).
+// Environment access is role-gated server-side.
 export function getSecrets(environment) {
   return apiGet(`/api/secrets?environment=${encodeURIComponent(environment)}`);
 }

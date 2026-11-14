@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useDropUp } from './useDropUp.js';
 
-// Ensemble-style combo: native <select> can't render tags inside options, so
+// Combo: native <select> can't render tags inside options, so
 // this renders a button + popover list. Options may carry a `tag` +
 // `tagKind` ('draft' | 'pub') shown as a pill next to the label.
 const Tag = ({ t }) =>

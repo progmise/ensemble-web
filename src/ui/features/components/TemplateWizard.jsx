@@ -139,7 +139,7 @@ export default function TemplateWizard({ onClose, onCreated }) {
             <span className="wiz-kind">Component Management</span>
             <div className="wiz-tpl">Nueva plantilla</div>
             <a className="chip tpl-doc"
-              href="https://github.com/progmise/deploy-orchestrator-api#readme"
+              href="https://github.com/progmise/ensemble-api#readme"
               target="_blank" rel="noreferrer">
               <Ico d={ICON.doc} />Documentación ↗</a>
             <div className="wiz-steps-v">

@@ -16,7 +16,7 @@ const COLUMNS = [
   { key: 'created_at', label: 'Fecha de registro', value: (m) => m.created_at },
 ];
 
-// Team list — Ensemble "Lista del equipo". Members grant repo access
+// Team list — "Lista del equipo". Members grant repo access
 // (developer) or PR-approval rights (technical-lead); registration date is
 // the alta timestamp from the API.
 export default function MembersView({ members, onChanged }) {

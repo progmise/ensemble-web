@@ -8,7 +8,7 @@ const pkg = require('../package.json');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
-// The real backend (deploy-orchestrator-api). Requests to /api/* are proxied
+// The real backend (ensemble-api). Requests to /api/* are proxied
 // there with the caller's cookies — same-origin from the browser's view, so
 // the session cookie stays SameSite=Lax and no CORS is needed.
 const API_UPSTREAM = (process.env.API_UPSTREAM || 'http://localhost:8081').replace(/\/$/, '');
@@ -50,13 +50,15 @@ app.use('/api', async (req, res) => {
 // --- SPA -------------------------------------------------------------------
 
 const dist = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'dist');
-app.use(express.static(dist));
+// The SPA lives under /ensemble — /api/* above stays at the root.
+app.use('/ensemble', express.static(dist));
 // SPA fallback only for extension-less routes — missing assets must 404,
 // not serve HTML (breaks module loading with confusing MIME errors).
-app.use((req, res) =>
+app.use('/ensemble', (req, res) =>
   req.path.includes('.')
     ? res.sendStatus(404)
     : res.sendFile(path.join(dist, 'index.html')));
+app.use((req, res) => res.redirect('/ensemble/'));
 
 app.listen(PORT, () =>
   console.log(`${pkg.name}:${pkg.version} on :${PORT} → api ${API_UPSTREAM}`));

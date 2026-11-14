@@ -2,7 +2,8 @@
 // once a session is confirmed; the component catalog reloads on demand.
 import { useCallback, useEffect, useState } from 'react';
 import { getManifest, getOrchRuns } from '../infrastructure/api/githubApi.js';
-import { getComponents, getDeployments, getTemplates } from '../infrastructure/api/catalogApi.js';
+import { getApplications, getComponents, getDeployments, getTemplates }
+  from '../infrastructure/api/catalogApi.js';
 
 export const useDashboardData = (me) => {
   const [manifest, setManifest] = useState(null);
@@ -10,6 +11,7 @@ export const useDashboardData = (me) => {
   const [deployments, setDeployments] = useState([]);
   const [catalog, setCatalog] = useState([]);
   const [templates, setTemplates] = useState([]);
+  const [applications, setApplications] = useState([]);
   const [error, setError] = useState(null);
 
   const reloadCatalog = useCallback(
@@ -18,6 +20,10 @@ export const useDashboardData = (me) => {
   );
   const reloadTemplates = useCallback(
     () => getTemplates().then(setTemplates).catch(() => setTemplates([])),
+    [],
+  );
+  const reloadApplications = useCallback(
+    () => getApplications().then(setApplications).catch(() => setApplications([])),
     [],
   );
 
@@ -32,8 +38,9 @@ export const useDashboardData = (me) => {
       .catch((e) => setError(e.message));
     reloadCatalog();
     reloadTemplates();
-  }, [me, reloadCatalog, reloadTemplates]);
+    reloadApplications();
+  }, [me, reloadCatalog, reloadTemplates, reloadApplications]);
 
-  return { manifest, runs, deployments, catalog, templates, error,
-    reloadCatalog, reloadTemplates };
+  return { manifest, runs, deployments, catalog, templates, applications, error,
+    reloadCatalog, reloadTemplates, reloadApplications };
 };

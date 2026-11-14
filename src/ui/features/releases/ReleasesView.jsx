@@ -18,7 +18,7 @@ const COLUMNS = [
   { key: 'published', label: 'Estado', value: (r) => String(r.published) },
 ];
 
-// Lista de releases — Ensemble "Releases": RLSE<number> wraps the deploy-manifest
+// Lista de releases — "Releases": RLSE<number> wraps the deploy-manifest
 // release v<version>; Estado reflects the manifest release (draft/Publicado),
 // the doc icon opens the detail/status view.
 export default function ReleasesView({ releases, me, onChanged, onOpen }) {
@@ -102,7 +102,7 @@ const WIZ_STEPS = [
   'Resumen de la confirmación',
 ];
 
-// Nueva release — Ensemble's "Crear" wizard: left rail with numbered steps,
+// Nueva release — creation wizard: left rail with numbered steps,
 // right pane per step. OAM version comes from the manifest's GitHub
 // Releases (drafts first, published below); the trail from the manifest's
 // environments; the deploy window (start/end) gates env deploys
