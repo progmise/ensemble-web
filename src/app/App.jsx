@@ -369,7 +369,8 @@ export default function App() {
           )}
 
           {view === 'team-members' && (
-            <TeamMembers id={teamId} members={members} />
+            <TeamMembers id={teamId} members={members}
+              onGoMembers={() => { setTeamId(null); setView('miembros'); }} />
           )}
 
           {view === 'miembros' && (

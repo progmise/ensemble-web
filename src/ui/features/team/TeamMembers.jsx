@@ -6,7 +6,7 @@ const initials = (s = '') =>
     .slice(0, 2).toUpperCase();
 
 // "Miembros del equipo" — member list of one team + add-member flow.
-export default function TeamMembers({ id, members = [] }) {
+export default function TeamMembers({ id, members = [], onGoMembers }) {
   const [row, setRow] = useState(null);   // null = loading, false = not found
   const [showForm, setShowForm] = useState(false);
 
@@ -55,13 +55,14 @@ export default function TeamMembers({ id, members = [] }) {
       {!tms.length && <p className="muted">El equipo aún no tiene miembros.</p>}
       {showForm && (
         <MemberModal teamId={row.id} candidates={candidates}
+          onGoMembers={onGoMembers}
           onClose={() => setShowForm(false)} onAdded={reload} />
       )}
     </div>
   );
 }
 
-function MemberModal({ teamId, candidates, onClose, onAdded }) {
+function MemberModal({ teamId, candidates, onGoMembers, onClose, onAdded }) {
   const [form, setForm] = useState({ github_username: '', owner: false });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
@@ -100,7 +101,11 @@ function MemberModal({ teamId, candidates, onClose, onAdded }) {
               ))}
             </select>
             {!candidates.length &&
-              <small className="muted">Todos los miembros registrados ya están en el equipo</small>}
+              <small className="muted">
+                Sin miembros disponibles — los equipos solo adjuntan miembros del
+                registro.{' '}
+                <a className="linklike" onClick={onGoMembers}>Registrarlos en Miembros</a>
+              </small>}
           </label>
           <label className="field">
             <span>
