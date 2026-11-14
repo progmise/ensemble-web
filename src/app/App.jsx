@@ -152,7 +152,7 @@ export default function App() {
   }, [view, appName, componentName, teamId, releaseNo]);
 
   const appCtx = appName && APP_VIEWS.includes(view);
-  const team = teams.find((t) => String(t.id) === String(teamId));
+  const team = (teams || []).find((t) => String(t.id) === String(teamId));
   const { releases, reload: reloadReleases } = useReleases(view === 'releases');
 
   if (me === undefined) return <CenterCard title="Ensemble" sub="Cargando…" />;
