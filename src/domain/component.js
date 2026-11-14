@@ -13,6 +13,14 @@ export const STATUS_LABEL = {
   failed: 'Falló',
 };
 
+// Application lifecycle stages — mirrors APP_LIFECYCLES in the API domain;
+// the applications list filters by these.
+export const APP_LIFECYCLES = [
+  'Certification/Homologation', 'Decommissioned', 'Deleted', 'Development',
+  'Disuse/Inactive', 'Friends and Family', 'Preproduction', 'Production',
+  'Test',
+];
+
 export const NAME_RE = /^[a-z0-9][a-z0-9-]{0,38}[a-z0-9]$/;
 export const REPO_RE = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,99}$/;
 export const SHORTNAME_RE = /^[A-Z0-9]{2,30}$/;

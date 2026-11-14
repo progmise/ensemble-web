@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { NAME_RE, SHORTNAME_RE } from '../../../domain/component.js';
+import { NAME_RE, SHORTNAME_RE, APP_LIFECYCLES } from '../../../domain/component.js';
 import { createApplication } from '../../../infrastructure/api/catalogApi.js';
 import { SearchRow, StatusPill } from '../../components/Feedback.jsx';
+import ChecklistFilter from '../../components/ChecklistFilter.jsx';
 
 const initials = (s = '') =>
   (s.split(/[\s-_]+/).map((w) => w[0]).join('') || s || '?').slice(0, 2).toUpperCase();
@@ -20,12 +21,15 @@ const COLUMNS = [
   { key: 'alias', label: 'Alias', value: (a) => a.alias },
   { key: 'id', label: 'ID', value: (a) => a.id },
   { key: 'componentes', label: 'Componentes', value: (a) => (a.components || []).length },
+  { key: 'lifecycle', label: 'Ciclo de vida', value: (a) => a.lifecycle },
   { key: 'estado', label: 'Estado' },
 ];
 
-// "Lista de aplicaciones" — search + register + sortable table.
+// "Lista de aplicaciones" — search + lifecycle filters + register +
+// sortable table.
 export default function ApplicationsView({ applications = [], catalog = [], onChanged, onOpen }) {
   const [q, setQ] = useState('');
+  const [cycles, setCycles] = useState([]);
   const [sort, setSort] = useState({ key: 'name', dir: 1 });
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -33,15 +37,17 @@ export default function ApplicationsView({ applications = [], catalog = [], onCh
 
   const rows = useMemo(() => {
     const lq = q.toLowerCase();
-    const list = (applications || []).filter((a) => !lq
-      || a.name.toLowerCase().includes(lq)
-      || (a.alias || '').toLowerCase().includes(lq)
-      || (a.business_unit || '').toLowerCase().includes(lq));
+    const list = (applications || []).filter((a) =>
+      (!cycles.length || cycles.includes(a.lifecycle))
+      && (!lq
+        || a.name.toLowerCase().includes(lq)
+        || (a.alias || '').toLowerCase().includes(lq)
+        || (a.business_unit || '').toLowerCase().includes(lq)));
     const col = COLUMNS.find((c) => c.key === sort.key);
     if (col?.value)
       list.sort((a, b) => String(col.value(a)).localeCompare(String(col.value(b))) * sort.dir);
     return list;
-  }, [applications, q, sort]);
+  }, [applications, q, cycles, sort]);
 
   const cycle = (key) => setSort((s) =>
     s.key !== key ? { key, dir: 1 } : s.dir === 1 ? { key, dir: -1 } : { key: null, dir: 1 });
@@ -49,7 +55,7 @@ export default function ApplicationsView({ applications = [], catalog = [], onCh
     sort.key !== key ? ' ⇅' : sort.dir === 1 ? ' ↑' : ' ↓';
 
   // oxlint-disable-next-line react-hooks/set-state-in-effect — deliberate reset
-  useEffect(() => setPage(1), [q, pageSize]);
+  useEffect(() => setPage(1), [q, cycles, pageSize]);
   const pages = Math.max(1, Math.ceil(rows.length / pageSize));
   const safePage = Math.min(page, pages);
   const visible = rows.slice((safePage - 1) * pageSize, safePage * pageSize);
@@ -61,8 +67,13 @@ export default function ApplicationsView({ applications = [], catalog = [], onCh
       <h2>Buscar aplicación</h2>
       <SearchRow q={q} setQ={setQ} placeholder="Nombre, alias o código"
         action={
-          <button className="btn btn-primary" style={{ marginLeft: 'auto' }}
-            onClick={() => setShowForm(true)}>Registrar la aplicación +</button>
+          <>
+            <ChecklistFilter title="Filtrar por ciclo de vida"
+              options={APP_LIFECYCLES} applied={cycles} onApply={setCycles}
+              placeholder="Selecciona un ciclo de vida" />
+            <button className="btn btn-primary" style={{ marginLeft: 'auto' }}
+              onClick={() => setShowForm(true)}>Registrar la aplicación +</button>
+          </>
         } />
       <p className="tbl-legend">Lista de aplicaciones</p>
       <table>
@@ -88,6 +99,7 @@ export default function ApplicationsView({ applications = [], catalog = [], onCh
               <td><code>{a.alias || '—'}</code></td>
               <td>{a.id ?? '—'}</td>
               <td>{(a.components || []).length}</td>
+              <td>{a.lifecycle || '—'}</td>
               <td><StatusPill status={appStatus(a.components)} /></td>
             </tr>
           ))}
@@ -120,6 +132,7 @@ export default function ApplicationsView({ applications = [], catalog = [], onCh
 function ApplicationModal({ catalog, onClose, onCreated }) {
   const [form, setForm] = useState({
     name: '', alias: '', business_unit: '', description: '', repo_prefix: '',
+    lifecycle: 'Development',
   });
   const [picked, setPicked] = useState([]);
   const [busy, setBusy] = useState(false);
@@ -180,6 +193,13 @@ function ApplicationModal({ catalog, onClose, onCreated }) {
               Los repos nuevos se llaman {(form.repo_prefix || form.name || '…')}-{'{componente}'} —
               vacío = el nombre de la aplicación
             </small>
+          </label>
+          <label className="field">
+            <span>Ciclo de vida</span>
+            <select value={form.lifecycle}
+              onChange={(e) => setForm((f) => ({ ...f, lifecycle: e.target.value }))}>
+              {APP_LIFECYCLES.map((l) => <option key={l} value={l}>{l}</option>)}
+            </select>
           </label>
           <label className="field">
             <span>Descripción</span>

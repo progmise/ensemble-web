@@ -47,27 +47,27 @@ const APP_NAV = [
 ];
 const APP_VIEWS = ['app-detail', 'app-components', 'component-detail', 'nuevo-componente'];
 
-// URL routing — /ensemble/<slug>[/<app>/componentes[/<id|nuevo>]].
+// URL routing — /ensemble/<slug>[/<app>/components[/<id|new>]].
 const SLUG_TOP = {
-  home: '', aplicaciones: 'aplicaciones', aplicacion: 'personal',
-  componentes: 'componentes', equipo: 'equipo', miembros: 'miembros',
-  seguridad: 'seguridad', despliegues: 'despliegues', releases: 'releases',
+  home: '', aplicaciones: 'applications', aplicacion: 'personal',
+  componentes: 'components', equipo: 'teams', miembros: 'members',
+  seguridad: 'security', despliegues: 'deployments', releases: 'releases',
 };
 const enc = encodeURIComponent;
 
 const pathFor = ({ view, appName, componentName, teamName, releaseNo }) => {
-  if (view === 'app-detail') return `/ensemble/aplicaciones/${enc(appName)}`;
+  if (view === 'app-detail') return `/ensemble/applications/${enc(appName)}`;
   if (view === 'app-components')
-    return `/ensemble/aplicaciones/${enc(appName)}/componentes`;
+    return `/ensemble/applications/${enc(appName)}/components`;
   if (view === 'component-detail')
     return appName
-      ? `/ensemble/aplicaciones/${enc(appName)}/componentes/${enc(componentName)}`
-      : `/ensemble/componentes/${enc(componentName)}`;
+      ? `/ensemble/applications/${enc(appName)}/components/${enc(componentName)}`
+      : `/ensemble/components/${enc(componentName)}`;
   if (view === 'nuevo-componente')
     return appName
-      ? `/ensemble/aplicaciones/${enc(appName)}/componentes/nuevo`
-      : '/ensemble/componentes/nuevo';
-  if (view === 'team-detail') return `/ensemble/equipo/${enc(teamName)}`;
+      ? `/ensemble/applications/${enc(appName)}/components/new`
+      : '/ensemble/components/new';
+  if (view === 'team-detail') return `/ensemble/teams/${enc(teamName)}`;
   if (view === 'release-detail') return `/ensemble/releases/${releaseNo}`;
   return `/ensemble/${SLUG_TOP[view] || ''}`;
 };
@@ -75,21 +75,21 @@ const pathFor = ({ view, appName, componentName, teamName, releaseNo }) => {
 const parsePath = () => {
   const seg = window.location.pathname.replace(/^\/ensemble\/?/, '')
     .split('/').filter(Boolean).map(decodeURIComponent);
-  if (seg[0] === 'aplicaciones' && seg[1]) {
-    if (seg[2] === 'componentes' && seg[3] === 'nuevo')
+  if (seg[0] === 'applications' && seg[1]) {
+    if (seg[2] === 'components' && seg[3] === 'new')
       return { view: 'nuevo-componente', appName: seg[1] };
-    if (seg[2] === 'componentes' && seg[3])
+    if (seg[2] === 'components' && seg[3])
       return { view: 'component-detail', appName: seg[1], componentName: seg[3] };
-    if (seg[2] === 'componentes')
+    if (seg[2] === 'components')
       return { view: 'app-components', appName: seg[1] };
     return { view: 'app-detail', appName: seg[1] };
   }
-  if (seg[0] === 'componentes') {
-    if (seg[1] === 'nuevo') return { view: 'nuevo-componente' };
+  if (seg[0] === 'components') {
+    if (seg[1] === 'new') return { view: 'nuevo-componente' };
     if (seg[1]) return { view: 'component-detail', componentName: seg[1] };
     return { view: 'componentes' };
   }
-  if (seg[0] === 'equipo' && seg[1]) return { view: 'team-detail', teamName: seg[1] };
+  if (seg[0] === 'teams' && seg[1]) return { view: 'team-detail', teamName: seg[1] };
   if (seg[0] === 'releases' && seg[1]) return { view: 'release-detail', releaseNo: seg[1] };
   const view = Object.keys(SLUG_TOP).find((v) => SLUG_TOP[v] === seg[0]) || 'home';
   return { view };

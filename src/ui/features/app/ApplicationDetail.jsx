@@ -43,6 +43,7 @@ export default function ApplicationDetail({ name, onOpenComponent, onNewComponen
           <div><label>Aplicación</label><strong>{name}</strong></div>
           <div><label>Alias</label><strong>{row.alias || '—'}</strong></div>
           <div><label>Unidad de negocio</label><strong>{row.business_unit || '—'}</strong></div>
+          <div><label>Ciclo de vida</label><strong>{row.lifecycle || '—'}</strong></div>
           <div><label>Estado</label>
             {appStatus(components)
               ? <StatusPill status={appStatus(components)} /> : <strong>—</strong>}
