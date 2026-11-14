@@ -120,7 +120,7 @@ const parsePath = () => {
   return { view };
 };
 
-// ☰ menu groups (home view only — inner views keep the sidebar)
+// ☰ menu groups — global nav, available from every view
 const MENU = [
   { title: null, items: ['home'] },
   { title: 'Gestión', items: ['aplicaciones'] },
@@ -215,9 +215,7 @@ export default function App() {
           ENSEMBLE
         </span>
         <span className="title">{view === 'home' ? '' : viewLabel}</span>
-        {view === 'home' && (
-          <button className="menu-btn" title="Menú" onClick={() => setMenu(true)}>☰</button>
-        )}
+        <button className="menu-btn" title="Menú" onClick={() => setMenu(true)}>☰</button>
         <UserMenu me={me} />
       </div>
       {view !== 'home' && (
