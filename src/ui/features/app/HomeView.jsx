@@ -25,9 +25,9 @@ export default function HomeView({ me, applications = [], onOpen }) {
         <div className="home-grid">
           {apps.map((a) => (
             <button key={a.name} className="home-tile" onClick={() => onOpen(a.name)}>
-              <span className="avatar">{(a.alias || a.name)[0]}</span>
+              <span className="avatar sq">{(a.alias || a.name)[0]}</span>
               <span>
-                <strong>{a.alias || a.name}</strong>
+                <strong>{a.name.toUpperCase()}</strong>
                 <small className="muted">ID: {a.id}</small>
               </span>
             </button>

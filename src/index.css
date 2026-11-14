@@ -358,6 +358,9 @@ tbody tr:hover { background: var(--panel); }
   background: #ccd6f0; color: #3b4a8f; font-size: 12px; font-weight: 700;
   display: inline-flex; align-items: center; justify-content: center;
 }
+/* Entity chips (applications/components) are rounded squares, navy on white
+   — person/user avatars stay round. */
+.avatar.sq { border-radius: 7px; background: #2c3a82; color: #fff; }
 .chip.role-developer { background: #fff; border-color: #9fb356; color: #5a7021; }
 .chip.role-technical-lead { background: #fff; border-color: #d98080; color: #b42318; }
 .chip.role-product-owner { background: #fff; border-color: #7a9fd4; color: #2b5ea7; }

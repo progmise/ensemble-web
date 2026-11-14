@@ -35,8 +35,8 @@ export default function ApplicationDetail({ name, onOpenComponent, onNewComponen
     <div className="card app-detail">
       <section className="app-main">
         <div className="app-hero">
-          <span className="avatar big">{initials(row.alias || name)}</span>
-          <h2>{name}</h2>
+          <span className="avatar big sq">{initials(row.alias || name)}</span>
+          <h2>{name.toUpperCase()}</h2>
         </div>
         <div className="app-id">
           <div><label>ID</label><strong>{row.id ?? '—'}</strong></div>
@@ -72,7 +72,7 @@ export default function ApplicationDetail({ name, onOpenComponent, onNewComponen
                   <td>
                     <button className="linklike member-name"
                       onClick={() => onOpenComponent(c.name)}>
-                      <span className="avatar">{initials(c.shortname || c.name)}</span>
+                      <span className="avatar sq">{initials(c.shortname || c.name)}</span>
                       <strong>{c.name}</strong>
                     </button>
                   </td>

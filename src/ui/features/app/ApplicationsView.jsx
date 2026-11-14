@@ -81,8 +81,8 @@ export default function ApplicationsView({ applications = [], catalog = [], onCh
             <tr key={a.name}>
               <td>
                 <button className="linklike member-name" onClick={() => onOpen(a.name)}>
-                  <span className="avatar">{initials(a.alias || a.name)}</span>
-                  <strong>{a.name}</strong>
+                  <span className="avatar sq">{initials(a.alias || a.name)}</span>
+                  <strong>{a.name.toUpperCase()}</strong>
                 </button>
               </td>
               <td><code>{a.alias || '—'}</code></td>
@@ -166,7 +166,7 @@ function ApplicationModal({ catalog, onClose, onCreated }) {
             <span>Alias</span>
             <input value={form.alias} placeholder="ejemplo: LOANS"
               onChange={(e) => setForm((f) => ({ ...f, alias: e.target.value.toUpperCase() }))} />
-            <small className="muted">mayúsculas y dígitos — se deduce del nombre si queda vacío</small>
+            <small className="muted">mayúsculas y dígitos — abreviatura corta del nombre (ej. ENS); se deduce del nombre si queda vacío</small>
           </label>
           <label className="field">
             <span>Unidad de negocio</span>

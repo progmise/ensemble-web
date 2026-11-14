@@ -50,7 +50,7 @@ export default function ComponentDetail({ name, templates = [], manifest, onChan
     <div className="card app-detail">
       <section className="app-main">
         <div className="app-hero">
-          <span className="avatar big">{initials(db.shortname || name)}</span>
+          <span className="avatar big sq">{initials(db.shortname || name)}</span>
           <h2>{db.shortname || name}</h2>
         </div>
         <div className="app-id">
