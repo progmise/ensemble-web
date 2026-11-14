@@ -72,7 +72,7 @@ export default function ApplicationMembers({ name, members = [], onGoMembers }) 
 
   return (
     <div className="card">
-      <h2>Buscar miembro</h2>
+      <h2>Lista del equipo</h2>
       <SearchRow q={q} setQ={setQ}
         placeholder="Nombre, email o ID corporativo"
         action={

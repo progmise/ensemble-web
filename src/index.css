@@ -361,6 +361,9 @@ tbody tr:hover { background: #d5dbe6; }
 /* --- Team --- */
 .member-name { display: inline-flex; align-items: center; gap: 10px; }
 .member-name strong { font-weight: 400; }
+/* People avatars are circles; entity avatars (apps/teams/components)
+   stay rounded squares. */
+.member-name .avatar { border-radius: 50%; }
 .avatar {
   width: 30px; height: 30px; border-radius: 7px; flex-shrink: 0;
   background: #ccd6f0; color: #3b4a8f; font-size: 12px; font-weight: 700;
