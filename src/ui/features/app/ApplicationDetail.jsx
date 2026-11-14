@@ -35,12 +35,12 @@ export default function ApplicationDetail({ name, onOpenComponent, onNewComponen
     <div className="card app-detail">
       <section className="app-main">
         <div className="app-hero">
-          <span className="avatar big sq">{initials(row.alias || name)}</span>
-          <h2>{name.toUpperCase()}</h2>
+          <span className="avatar big sq">{initials(row.alias || row.name)}</span>
+          <h2>{(row.name || name).toUpperCase()}</h2>
         </div>
         <div className="app-id">
           <div><label>ID</label><strong>{row.id ?? '—'}</strong></div>
-          <div><label>Aplicación</label><strong>{name}</strong></div>
+          <div><label>Aplicación</label><strong>{row.name || name}</strong></div>
           <div><label>Alias</label><strong>{row.alias || '—'}</strong></div>
           <div><label>Unidad de negocio</label><strong>{row.business_unit || '—'}</strong></div>
           <div><label>Ciclo de vida</label><strong>{row.lifecycle || '—'}</strong></div>

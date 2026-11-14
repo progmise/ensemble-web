@@ -328,7 +328,7 @@ export default function App() {
           {view === 'aplicaciones' && (
             <ApplicationsView applications={applications} me={me}
               onChanged={reloadApplications}
-              onOpen={(n) => { setAppRef(n); setView('app-detail'); }} />
+              onOpen={(n) => { setAppRef(String(n)); setView('app-detail'); }} />
           )}
 
           {view === 'app-detail' && (
@@ -353,7 +353,7 @@ export default function App() {
 
           {view === 'home' && (
             <HomeView me={me} applications={applications}
-              onOpen={(n) => { setAppRef(n); setView('app-detail'); }} />
+              onOpen={(n) => { setAppRef(String(n)); setView('app-detail'); }} />
           )}
 
           {/* Platform card kept but unlinked — reachable only by direct
