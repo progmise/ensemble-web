@@ -361,6 +361,8 @@ tbody tr:hover { background: #d5dbe6; }
 /* Entity chips (applications/components) are rounded squares, navy on white
    — person/user avatars stay round. */
 .avatar.sq { border-radius: 7px; background: #2c3a82; color: #fff; }
+/* Home tiles use the light chip — dark navy letter on light periwinkle. */
+.home-tile .avatar.sq { background: #d6e0f0; color: #2c3a82; }
 .chip.role-developer { background: #fff; border-color: #9fb356; color: #5a7021; }
 .chip.role-technical-lead { background: #fff; border-color: #d98080; color: #b42318; }
 .chip.role-product-owner { background: #fff; border-color: #7a9fd4; color: #2b5ea7; }
