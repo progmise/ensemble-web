@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { createMember } from '../../../infrastructure/api/catalogApi.js';
 import { SearchRow } from '../../components/Feedback.jsx';
+import { SortIco } from '../../components/Icons.jsx';
 
 const ROLE_LABEL = { developer: 'developer', 'technical-lead': 'technical-lead', 'product-owner': 'product-owner' };
 const MEMBER_ROLES = ['developer', 'technical-lead', 'product-owner'];
@@ -38,8 +39,6 @@ export default function MembersView({ members, onChanged }) {
 
   const cycle = (key) => setSort((s) =>
     s.key !== key ? { key, dir: 1 } : s.dir === 1 ? { key, dir: -1 } : { key: null, dir: 1 });
-  const arrow = (key) =>
-    sort.key !== key ? ' ⇅' : sort.dir === 1 ? ' ↑' : ' ↓';
 
   return (
     <div className="card">
@@ -56,7 +55,7 @@ export default function MembersView({ members, onChanged }) {
             {COLUMNS.map((c) => (
               <th key={c.key} className={c.value ? 'th-sort' : ''}
                 onClick={c.value ? () => cycle(c.key) : undefined}>
-                {c.label}{c.value && <span className="sort-arrow">{arrow(c.key)}</span>}
+                {c.label}{c.value && <SortIco column={c.key} sort={sort} />}
               </th>
             ))}
           </tr>

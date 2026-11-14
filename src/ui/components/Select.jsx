@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useDropUp } from './useDropUp.js';
+import { Ico, ICON } from './Icons.jsx';
 
 // Combo: native <select> can't render tags inside options, so
 // this renders a button + popover list. Options may carry a `tag` +
@@ -34,7 +35,7 @@ export default function Select({ value, options = [], onChange,
           {selected ? <>{selected.label}{selected.tag && <Tag t={selected} />}</>
             : placeholder}
         </span>
-        <span className="sel-caret">{open ? '⌃' : '⌄'}</span>
+        <span className="sel-caret"><Ico d={open ? ICON.chevronUp : ICON.chevronDown} /></span>
       </button>
       {open && (
         <ul className={`sel-list${up ? ' up' : ''}`}>

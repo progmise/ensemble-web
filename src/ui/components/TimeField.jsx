@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useDropUp } from './useDropUp.js';
+import { Ico, ICON } from './Icons.jsx';
 
 // Time combo — same button+popover pattern as Select, listing times in
 // 5-minute steps. `minTime` is a static lower bound ('HH:MM'); `onDate` +
@@ -50,7 +51,7 @@ export default function TimeField({ value, onChange, minTime = '00:00',
         <span className={`sel-label${value ? '' : ' placeholder'}`}>
           {value || placeholder}
         </span>
-        <span className="sel-caret">{open ? '⌃' : '⌄'}</span>
+        <span className="sel-caret"><Ico d={open ? ICON.chevronUp : ICON.chevronDown} /></span>
       </button>
       {open && (
         <ul className={`sel-list${up ? ' up' : ''}`}>

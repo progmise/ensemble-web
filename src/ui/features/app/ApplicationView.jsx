@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getRepo } from '../../../infrastructure/api/githubApi.js';
 import { getMembers, getReleases } from '../../../infrastructure/api/catalogApi.js';
-import { GhIcon, PrIcon } from '../../components/Icons.jsx';
+import { GhIcon, PrIcon, Ico, ICON } from '../../components/Icons.jsx';
 
 const OWNER_ROLES = ['technical-lead', 'product-owner'];
 const initials = (s = '') =>
@@ -73,7 +73,7 @@ export default function ApplicationView({ manifest }) {
             {owners.map((m) => (
               <span key={m.github_username} className="owner-chip">
                 <span className="avatar">{initials(m.full_name || m.github_username)}</span>
-                {m.full_name || m.github_username} ⌄
+                {m.full_name || m.github_username} <Ico d={ICON.chevronDown} />
               </span>
             ))}
             {!owners.length && <span className="muted">—</span>}

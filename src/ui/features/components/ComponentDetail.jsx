@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getComponent, getMembers, retryProvision } from '../../../infrastructure/api/catalogApi.js';
 import { StatusPill } from '../../components/Feedback.jsx';
-import { GhIcon, PrIcon } from '../../components/Icons.jsx';
+import { GhIcon, PrIcon, Ico, ICON } from '../../components/Icons.jsx';
 
 const dateOnly = (iso) => (iso ? new Date(iso).toLocaleDateString() : '—');
 const initials = (s = '') =>
@@ -90,7 +90,7 @@ export default function ComponentDetail({ name, templates = [], manifest, onChan
             {owners.map((m) => (
               <span key={m.github_username} className="owner-chip">
                 <span className="avatar">{initials(m.full_name || m.github_username)}</span>
-                {m.full_name || m.github_username} ⌄
+                {m.full_name || m.github_username} <Ico d={ICON.chevronDown} />
               </span>
             ))}
             {!owners.length && <span className="muted">—</span>}

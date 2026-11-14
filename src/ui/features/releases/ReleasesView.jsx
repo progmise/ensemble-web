@@ -6,7 +6,7 @@ import DateField from '../../components/DateField.jsx';
 import TimeField from '../../components/TimeField.jsx';
 
 const pad2 = (n) => String(n).padStart(2, '0');
-import { Ico, ICON } from '../../components/Icons.jsx';
+import { Ico, ICON, SortIco } from '../../components/Icons.jsx';
 
 const dateOnly = (iso) => (iso ? new Date(`${iso}`.slice(0, 10)).toLocaleDateString() : '—');
 
@@ -42,8 +42,6 @@ export default function ReleasesView({ releases, me, onChanged, onOpen }) {
 
   const cycle = (key) => setSort((s) =>
     s.key !== key ? { key, dir: 1 } : s.dir === 1 ? { key, dir: -1 } : { key: null, dir: 1 });
-  const arrow = (key) =>
-    sort.key !== key ? ' ⇅' : sort.dir === 1 ? ' ↑' : ' ↓';
 
   return (
     <div className="card">
@@ -61,7 +59,7 @@ export default function ReleasesView({ releases, me, onChanged, onOpen }) {
           <tr>
             {COLUMNS.map((c) => (
               <th key={c.key} className="th-sort" onClick={() => cycle(c.key)}>
-                {c.label}<span className="sort-arrow">{arrow(c.key)}</span>
+                {c.label}<SortIco column={c.key} sort={sort} />
               </th>
             ))}
             <th>Action</th>

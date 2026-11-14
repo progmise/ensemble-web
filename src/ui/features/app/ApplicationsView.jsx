@@ -3,6 +3,7 @@ import { NAME_RE, SHORTNAME_RE, APP_LIFECYCLES } from '../../../domain/component
 import { createApplication } from '../../../infrastructure/api/catalogApi.js';
 import { SearchRow, StatusPill } from '../../components/Feedback.jsx';
 import ChecklistFilter from '../../components/ChecklistFilter.jsx';
+import { SortIco } from '../../components/Icons.jsx';
 
 const initials = (s = '') =>
   (s.split(/[\s-_]+/).map((w) => w[0]).join('') || s || '?').slice(0, 2).toUpperCase();
@@ -51,8 +52,6 @@ export default function ApplicationsView({ applications = [], catalog = [], onCh
 
   const cycle = (key) => setSort((s) =>
     s.key !== key ? { key, dir: 1 } : s.dir === 1 ? { key, dir: -1 } : { key: null, dir: 1 });
-  const arrow = (key) =>
-    sort.key !== key ? ' ⇅' : sort.dir === 1 ? ' ↑' : ' ↓';
 
   // oxlint-disable-next-line react-hooks/set-state-in-effect — deliberate reset
   useEffect(() => setPage(1), [q, cycles, pageSize]);
@@ -82,7 +81,7 @@ export default function ApplicationsView({ applications = [], catalog = [], onCh
             {COLUMNS.map((c) => (
               <th key={c.key} className={c.value ? 'th-sort' : ''}
                 onClick={c.value ? () => cycle(c.key) : undefined}>
-                {c.label}{c.value && <span className="sort-arrow">{arrow(c.key)}</span>}
+                {c.label}{c.value && <SortIco column={c.key} sort={sort} />}
               </th>
             ))}
           </tr>

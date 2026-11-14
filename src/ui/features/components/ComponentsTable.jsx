@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { mergeCatalog } from '../../../domain/component.js';
 import { retryProvision } from '../../../infrastructure/api/catalogApi.js';
 import { StatusPill } from '../../components/Feedback.jsx';
-import { GhIcon, PrIcon } from '../../components/Icons.jsx';
+import { GhIcon, PrIcon, SortIco } from '../../components/Icons.jsx';
 
 const dateOnly = (iso) => (iso ? new Date(iso).toLocaleDateString() : '—');
 
@@ -45,8 +45,6 @@ export default function ComponentsTable({ manifest, catalog, templates = [], q, 
 
   const cycle = (key) => setSort((s) =>
     s.key !== key ? { key, dir: 1 } : s.dir === 1 ? { key, dir: -1 } : { key: null, dir: 1 });
-  const arrow = (key) =>
-    sort.key !== key ? ' ⇅' : sort.dir === 1 ? ' ↑' : ' ↓';
 
   // Reset to page 1 whenever the visible set changes (search/filters/size).
   // oxlint-disable-next-line react-hooks/set-state-in-effect — deliberate reset
@@ -67,7 +65,7 @@ export default function ComponentsTable({ manifest, catalog, templates = [], q, 
               <th key={c.key}
                 className={c.value ? 'th-sort' : ''}
                 onClick={c.value ? () => cycle(c.key) : undefined}>
-                {c.label}{c.value && <span className="sort-arrow">{arrow(c.key)}</span>}
+                {c.label}{c.value && <SortIco column={c.key} sort={sort} />}
               </th>
             ))}
           </tr>

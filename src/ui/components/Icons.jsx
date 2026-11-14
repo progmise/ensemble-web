@@ -28,10 +28,19 @@ export const ICON = {
   seguridad: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z M9 12l2 2 4-4',
   chevronDown: 'M6 9l6 6 6-6',
   chevronUp: 'M18 15l-6-6-6 6',
+  sort: 'M7 15l5 5 5-5 M7 9l5-5 5 5',
+  sortAsc: 'M12 19V5 M5 12l7-7 7 7',
+  sortDesc: 'M12 5v14 M19 12l-7 7-7-7',
 };
 
 export const Ico = ({ d }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
     <path d={d} strokeLinecap="round" strokeLinejoin="round" />
   </svg>
+);
+
+// Sortable-column indicator — idle chevrons, direction arrow when sorted.
+export const SortIco = ({ column, sort }) => (
+  <Ico d={sort.key !== column ? ICON.sort
+    : sort.dir === 1 ? ICON.sortAsc : ICON.sortDesc} />
 );
