@@ -12,7 +12,7 @@ RUN npm run build
 
 FROM node:24-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1
 # Bump packages with known fixes beyond the pinned base (CSA findings)
-RUN apk upgrade --no-cache libexpat
+RUN apk upgrade --no-cache libexpat musl musl-utils zlib
 WORKDIR /app
 ENV NODE_ENV=production
 COPY package*.json ./
