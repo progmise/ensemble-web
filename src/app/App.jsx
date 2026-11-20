@@ -361,23 +361,29 @@ export default function App() {
           )}
 
           {view === 'app-components' && (
-            <div className="card">
-              <p className="card-label">Buscar componente</p>
-              <SearchRow q={q} setQ={setQ} placeholder="Mi componente favorito"
-                action={
-                  <>
-                    <FiltersMenu templates={templates} filters={filters} setFilters={setFilters} />
-                    <button className="btn btn-primary" style={{ marginLeft: 'auto' }}
-                      onClick={() => { setView('nuevo-componente'); setQ(''); }}>Nuevo componente +</button>
-                  </>
-                } />
-              <p className="muted" style={{ fontSize: 12, margin: '-8px 0 14px' }}>
-                Buscar por nombre, nombre corto o plantilla</p>
-              <ComponentsTable manifest={appManifest}
-                catalog={catalog.filter((c) => c.application === appLabel)}
-                templates={templates} q={lower} filters={filters} onChanged={reloadCatalog}
-                onOpen={(n) => { setComponentName(n); setView('component-detail'); setQ(''); }} />
-            </div>
+            <>
+              <div className="card">
+                <p className="card-label">Buscar componente</p>
+                <SearchRow q={q} setQ={setQ} placeholder="Mi componente favorito"
+                  action={
+                    <>
+                      <FiltersMenu templates={templates} filters={filters} setFilters={setFilters} />
+                      <button className="btn btn-primary" style={{ marginLeft: 'auto' }}
+                        onClick={() => { setView('nuevo-componente'); setQ(''); }}>Nuevo componente +</button>
+                    </>
+                  } />
+                <p className="muted" style={{ fontSize: 12, margin: '-8px 0 14px' }}>
+                  Buscar por nombre, nombre corto o plantilla</p>
+                <ComponentsTable manifest={appManifest}
+                  catalog={catalog.filter((c) => c.application === appLabel)}
+                  templates={templates} q={lower} filters={filters} onChanged={reloadCatalog}
+                  onOpen={(n) => { setComponentName(n); setView('component-detail'); setQ(''); }} />
+              </div>
+              <div className="card">
+                <h2>Grafo de dependencias</h2>
+                <DependencyGraph components={appManifest.components} />
+              </div>
+            </>
           )}
 
           {view === 'componentes' && (
