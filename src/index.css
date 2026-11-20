@@ -474,6 +474,7 @@ tbody tr:hover { background: #d5dbe6; }
 }
 
 .summary-table { width: 100%; margin-bottom: 12px; }
+.summary-table tr { background: none; }
 .summary-table td { padding: 7px 10px; border-bottom: 1px solid var(--line); font-size: 13px; }
 .summary-table td:first-child { color: var(--text); font-weight: 600; }
 .summary-table td:last-child { text-align: right; }
