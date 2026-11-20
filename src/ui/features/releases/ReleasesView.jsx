@@ -374,10 +374,13 @@ function ReleaseModal({ me, releases, app, onClose, onCreated }) {
                   <span>Dueño del producto *</span>
                   <Select value={form.product_owner} placeholder="Dueño del producto"
                     onChange={(v) => setForm((f) => ({ ...f, product_owner: v }))}
-                    options={leads.map((m) => ({
-                      value: m.email,
-                      label: `${m.full_name} — ${m.email}`,
-                    }))} />
+                    options={(options?.productOwners?.length
+                      ? options.productOwners
+                      : leads.map((m) => ({ email: m.email, name: m.full_name })))
+                      .map((m) => ({
+                        value: m.email,
+                        label: `${m.name} — ${m.email}`,
+                      }))} />
                 </label>
                 <label className="field">
                   <span>Solicitado por</span>
