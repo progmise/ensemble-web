@@ -45,7 +45,7 @@ export default function ReleasesView({ releases, me, onChanged, onOpen }) {
 
   return (
     <div className="card">
-      <h2>Buscar releases</h2>
+      <p className="card-label">Buscar releases</p>
       <SearchRow q={q} setQ={setQ} placeholder="Buscar por número de release…"
         action={<>
           <input type="date" className="date-filter" value={date}
