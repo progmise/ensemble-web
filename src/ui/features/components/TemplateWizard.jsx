@@ -291,7 +291,7 @@ export default function TemplateWizard({ onClose, onCreated }) {
                     <button type="button"
                       className={`chip role-toggle${spec?.manifest ? ' role-developer on' : ''}`}
                       onClick={() => setSpec((s) => ({ ...s, manifest: !s?.manifest }))}>
-                      Registrar en deploy-manifest
+                      Registrar en el app-model
                     </button>
                   </span>
                   <small className="muted">

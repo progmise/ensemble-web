@@ -86,7 +86,7 @@ export default function ComponentsTable({ manifest, catalog, templates = [], q, 
                   <a href={`https://github.com/${c.repo}`} target="_blank" rel="noreferrer"
                      title={c.repo}>{GhIcon}</a>
                   {c.db?.manifest_pr &&
-                    <a href={`https://github.com/progmise/deploy-manifest/pull/${c.db.manifest_pr}`}
+                    <a href={`https://github.com/progmise/${c.db.application}-app-model/pull/${c.db.manifest_pr}`}
                        target="_blank" rel="noreferrer"
                        title={`PR de registro #${c.db.manifest_pr}`}>{PrIcon}</a>}
                 </span></td>

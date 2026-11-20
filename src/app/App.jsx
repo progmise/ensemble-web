@@ -478,7 +478,7 @@ export default function App() {
         <span className="footer-links">
           <a href="/api/health" target="_blank" rel="noreferrer">Estado del sistema</a>
           <span className="footer-sep">|</span>
-          <a href="https://github.com/progmise/deploy-manifest#readme"
+          <a href={`https://github.com/${manifest.repo}#readme`}
             target="_blank" rel="noreferrer">Documentación</a>
           <span className="footer-sep">|</span>
           <a href="https://github.com/progmise/ensemble-web/issues"

@@ -66,7 +66,7 @@ export default function ApplicationDetail({ name, onGoMembers }) {
           <div className="app-links">
             <label>Enlaces útiles</label>
             <div className="link-chips">
-              <a href="https://github.com/progmise/deploy-manifest#readme"
+              <a href={`https://github.com/${row.repo}#readme`}
                 target="_blank" rel="noreferrer">
                 Documentación <Ico d={ICON.extLink} /></a>
               <a href="https://github.com/progmise/ensemble-web/issues"
