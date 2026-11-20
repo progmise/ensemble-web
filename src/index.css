@@ -418,7 +418,8 @@ tbody tr:hover { background: #d5dbe6; }
   align-items: center; gap: 8px; font-size: 13px; }
 .sel-opt:hover { background: var(--panel); }
 .sel-opt.selected { font-weight: 600; }
-.sel-tag { font-size: 11px; padding: 1px 8px; border-radius: 999px; }
+.sel-tag { font-size: 11px; padding: 2px 8px; border-radius: 999px;
+  display: inline-flex; align-items: center; line-height: 1.3; }
 .tag-draft { background: #6b7684; color: #fff; }
 .tag-pub { background: #fff; color: var(--teal); border: 1px solid var(--teal); }
 
