@@ -258,9 +258,9 @@ function ReleaseModal({ me, releases, app, onClose, onCreated }) {
         <div className="wiz-cols">
           <aside className="wiz-side">
             <span className="wiz-kind">Release Management</span>
-            <div className="wiz-tpl">DEPLOY-MANIFEST</div>
+            <div className="wiz-tpl">{options?.repo?.split('/')[1]?.toUpperCase() || 'APP-MODEL'}</div>
             <a className="chip tpl-doc"
-              href="https://github.com/progmise/deploy-manifest#readme"
+              href={`https://github.com/${options?.repo || ''}`}
               target="_blank" rel="noreferrer">
               <Ico d={ICON.doc} />Documentación ↗</a>
             <div className="wiz-steps-v">
