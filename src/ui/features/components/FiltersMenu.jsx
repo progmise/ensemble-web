@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { STATUS_LABEL } from '../../../domain/component.js';
+import { Ico, ICON } from '../../components/Icons.jsx';
 
 // Dropdown filter panel for the components table (plantilla + estado).
 // `filters` = { plantilla: '', estado: '' } — empty string = no filter.
@@ -15,7 +16,8 @@ export default function FiltersMenu({ templates = [], filters, setFilters }) {
     <span className="filters-menu">
       <button className={`btn btn-teal${active ? ' has-active' : ''}`}
         onClick={() => setOpen((o) => !o)}>
-        Filtros {active > 0 && <span className="filters-count">{active}</span>} ⌄
+        Filtros {active > 0 && <span className="filters-count">{active}</span>}
+        <Ico d={ICON.chevronDown} />
       </button>
       {open && (
         <span className="filters-pop" onMouseLeave={() => setOpen(false)}>

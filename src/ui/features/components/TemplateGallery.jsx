@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { SearchRow } from '../../components/Feedback.jsx';
 import { Ico, ICON } from '../../components/Icons.jsx';
+import TemplateWizard from './TemplateWizard.jsx';
 
 // Template catalog page — the "Nuevo componente" destination. Picking a
 // card opens the stepped wizard (Información → Personalización → Resumen).
-export default function TemplateGallery({ templates, onPick }) {
+export default function TemplateGallery({ templates, onPick, onChanged }) {
   const [q, setQ] = useState('');
   const [kind, setKind] = useState('all');
   const [mode, setMode] = useState('grid');
+  const [showWizard, setShowWizard] = useState(false);
   const shown = (templates || []).filter((t) =>
     (kind === 'all' || t.kind === kind)
     && (!q || [t.name, t.display_name, t.description].join(' ').toLowerCase().includes(q)));
@@ -27,7 +29,8 @@ export default function TemplateGallery({ templates, onPick }) {
         action={
           <>
             <span className="chips" style={{ marginLeft: 'auto' }}>
-              {[['all', 'Todas'], ['app', 'Apps'], ['lib', 'Libs']].map(([v, l]) => (
+              {[['all', 'Todas'], ['app', 'Apps'], ['lib', 'Libs'], ['cm', 'CMs'],
+                ['secrets', 'Secrets'], ['app-model', 'OAM']].map(([v, l]) => (
                 <button key={v}
                   className={`chip${kind === v ? ' chip-teal' : ''}`}
                   style={{ cursor: 'pointer', border: 'none' }}
@@ -40,6 +43,8 @@ export default function TemplateGallery({ templates, onPick }) {
               <button className={mode === 'list' ? 'active' : ''} title="Lista"
                 onClick={() => setMode('list')}><Ico d={ICON.list} /></button>
             </span>
+            <button className="btn btn-primary"
+              onClick={() => setShowWizard(true)}>Nueva plantilla +</button>
           </>
         } />
       </div>
@@ -52,7 +57,9 @@ export default function TemplateGallery({ templates, onPick }) {
               onClick={() => onPick(t)} onKeyDown={(e) => e.key === 'Enter' && onPick(t)}>
               <div className="tpl-card-head">
                 <span className="tpl-meta">
-                  {t.kind === 'lib' ? 'Lib' : 'App'}
+                  {t.kind === 'lib' ? 'Lib' : t.kind === 'cm' ? 'CM'
+                    : t.kind === 'secrets' ? 'Sec'
+                    : t.kind === 'app-model' ? 'OAM' : 'App'}
                   <span className={`chip${t.kind === 'lib' ? '' : ' chip-teal'}`}>{t.kind}</span>
                 </span>
                 <strong>{t.display_name || t.name}</strong>
@@ -81,6 +88,9 @@ export default function TemplateGallery({ templates, onPick }) {
       )}
       {templates && !shown.length && <p className="muted">Sin plantillas para ese filtro.</p>}
       </div>
+      {showWizard && (
+        <TemplateWizard onClose={() => setShowWizard(false)} onCreated={onChanged} />
+      )}
     </div>
   );
 }

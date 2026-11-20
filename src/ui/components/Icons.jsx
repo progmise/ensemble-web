@@ -14,6 +14,7 @@ export const PrIcon = (
 // oxlint-disable-next-line react/only-export-components -- shared icon paths
 export const ICON = {
   grid: 'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z',
+  home: 'M3 10.5 12 3l9 7.5 M5 9.5V21h14V9.5',
   list: 'M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01',
   doc: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8',
   logo: 'M12 2 2 7l10 5 10-5-10-5z M2 17l10 5 10-5 M2 12l10 5 10-5',
@@ -22,9 +23,29 @@ export const ICON = {
   equipo: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75',
   despliegues: 'M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z',
   play: 'M6 4l14 8-14 8z',
+  calendar: 'M3 5h18v16H3z M3 10h18 M8 3v4 M16 3v4',
   refresh: 'M23 4v6h-6 M1 20v-6h6 M3.5 9a9 9 0 0 1 14.9-3.4L23 10 M1 14l4.6 4.4A9 9 0 0 0 20.5 15',
+  seguridad: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z M9 12l2 2 4-4',
+  chevronDown: 'M6 9l6 6 6-6',
+  checkCircle: 'M22 11.08V12a10 10 0 1 1-5.93-9.14 M22 4 12 14.01l-3-3',
+  alertCircle: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 8v4 M12 16h.01',
+  clock: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 6v6l4 2',
+  info: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 16v-4 M12 8h.01',
+  extLink: 'M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6 M15 3h6v6 M10 14 21 3',
+  chevronUp: 'M18 15l-6-6-6 6',
+  sort: 'M7 15l5 5 5-5 M7 9l5-5 5 5',
+  sortAsc: 'M12 19V5 M5 12l7-7 7 7',
+  sortDesc: 'M12 5v14 M19 12l-7 7-7-7',
 };
 
 export const Ico = ({ d }) => (
-  <svg viewBox="0 0 24 24" aria-hidden="true"><path d={d} strokeLinecap="round" strokeLinejoin="round" /></svg>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+    <path d={d} strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+// Sortable-column indicator — idle chevrons, direction arrow when sorted.
+export const SortIco = ({ column, sort }) => (
+  <Ico d={sort.key !== column ? ICON.sort
+    : sort.dir === 1 ? ICON.sortAsc : ICON.sortDesc} />
 );
