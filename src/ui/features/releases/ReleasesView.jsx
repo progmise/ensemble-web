@@ -379,7 +379,7 @@ function ReleaseModal({ me, releases, app, onClose, onCreated }) {
                       : leads.map((m) => ({ email: m.email, name: m.full_name })))
                       .map((m) => ({
                         value: m.email,
-                        label: `${m.name} — ${m.email}`,
+                        label: `${m.name} - ${m.email}`,
                       }))} />
                 </label>
                 <label className="field">
