@@ -295,7 +295,8 @@ tbody tr:hover { background: #d5dbe6; }
 .chip-teal { background: #e6f4f4; border-color: #bfe3e3; color: var(--teal); }
 /* --- Sortable table headers + filters --- */
 .tbl-legend { font-size: 12.5px; font-weight: 600; color: var(--text); margin: 28px 0 10px; }
-.card-label { font-size: 13px; margin: 0 0 8px; }
+.card-label { font-size: 12.5px; font-weight: 600; color: var(--text);
+  margin: 0 0 10px; }
 .date-filter { padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px;
   background: #fff; font: inherit; font-size: 12.5px; color: var(--muted); }
 .th-sort { cursor: pointer; user-select: none; }
