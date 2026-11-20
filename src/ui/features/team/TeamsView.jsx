@@ -47,7 +47,7 @@ export default function TeamsView({ teams = [], members = [], onChanged, onOpen 
 
   return (
     <div className="card">
-      <h2>Buscar equipo</h2>
+      <p className="card-label">Buscar equipo</p>
       <SearchRow q={q} setQ={setQ} placeholder="Buscar equipo"
         action={
           <button className="btn btn-primary" style={{ marginLeft: 'auto' }}

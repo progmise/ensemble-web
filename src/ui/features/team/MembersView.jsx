@@ -39,7 +39,7 @@ export default function MembersView({ members, onChanged }) {
 
   return (
     <div className="card">
-      <h2>Buscar miembro</h2>
+      <p className="card-label">Buscar miembro</p>
       <SearchRow q={q} setQ={setQ} placeholder="Nombre, email o usuario de GitHub"
         action={
           <button className="btn btn-primary" style={{ marginLeft: 'auto' }}

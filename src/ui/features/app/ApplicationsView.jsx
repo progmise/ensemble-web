@@ -57,7 +57,7 @@ export default function ApplicationsView({ applications = [], me,
 
   return (
     <div className="card">
-      <h2>Buscar aplicación</h2>
+      <p className="card-label">Buscar aplicación</p>
       <SearchRow q={q} setQ={setQ} placeholder="Nombre, alias o código"
         action={
           <>

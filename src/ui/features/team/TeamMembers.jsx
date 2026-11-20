@@ -60,7 +60,7 @@ export default function TeamMembers({ id, members = [], onGoMembers }) {
 
   return (
     <div className="card">
-      <h2>Buscar miembro del equipo</h2>
+      <p className="card-label">Buscar miembro del equipo</p>
       <SearchRow q={q} setQ={setQ} placeholder="Buscar miembro"
         action={
           <button className="btn btn-primary" style={{ marginLeft: 'auto' }}

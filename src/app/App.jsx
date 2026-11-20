@@ -362,7 +362,7 @@ export default function App() {
 
           {view === 'app-components' && (
             <div className="card">
-              <h2>Buscar componente</h2>
+              <p className="card-label">Buscar componente</p>
               <SearchRow q={q} setQ={setQ} placeholder="Mi componente favorito"
                 action={
                   <>
@@ -383,7 +383,7 @@ export default function App() {
           {view === 'componentes' && (
             <>
               <div className="card">
-                <h2>Buscar componente</h2>
+                <p className="card-label">Buscar componente</p>
                 <SearchRow q={q} setQ={setQ} placeholder="Mi componente favorito"
                   action={
                     <>
