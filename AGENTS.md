@@ -39,7 +39,7 @@ src/
                              flip up via useDropUp)
     features/
       session/Gate.jsx       Login / Unauthorized / UserMenu
-      app/ApplicationView.jsx   platform detail card (deploy-manifest) —
+      app/ApplicationView.jsx   app-model detail card (app-model) —
                                 first sidebar item / landing view
       releases/ReleasesView.jsx, ReleaseDetail.jsx
       components/            ComponentsTable, ComponentDetail (
@@ -98,5 +98,5 @@ Work branches: `<type>/<snake_description>` — `feature/`, `fix/`, `chore/`,
 All pipeline logic lives in `progmise/reusable-workflows` (`@v1`,
 `secrets: inherit`) — callers in `.github/workflows/` are thin; keep them so.
 Bump `version` in `package.json`, merge `development` → `main`, then run the
-**Release** workflow manually on `main`. Deploys go through `deploy-manifest`
+**Release** workflow manually on `main`. Deploys go through the app-model (`<app>-app-model`)
 (`deploy.yml` dispatch); the Vercel project was created lazily on first deploy.
