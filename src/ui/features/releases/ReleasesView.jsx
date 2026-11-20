@@ -18,7 +18,7 @@ const COLUMNS = [
   { key: 'published', label: 'Estado', value: (r) => String(r.published) },
 ];
 
-// Lista de releases — "Releases": RLSE<number> wraps the deploy-manifest
+// Lista de releases — "Releases": RLSE<number> wraps the app-model
 // release v<version>; Estado reflects the manifest release (draft/Publicado),
 // the doc icon opens the detail/status view.
 export default function ReleasesView({ releases, me, app, onChanged, onOpen }) {

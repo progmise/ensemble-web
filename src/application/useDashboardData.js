@@ -29,12 +29,14 @@ export const useDashboardData = (me) => {
 
   useEffect(() => {
     if (!me || me.forbidden) return;
-    Promise.all([
-      getManifest(),
-      getOrchRuns().catch(() => []),
-      getDeployments().catch(() => []),
-    ])
-      .then(([m, o, d]) => { setManifest(m); setRuns(o); setDeployments(d); })
+    getManifest()
+      .then((m) => {
+        setManifest(m);
+        return Promise.all([
+          getOrchRuns(m?.repo).catch(() => []),
+          getDeployments().catch(() => []),
+        ]).then(([o, d]) => { setRuns(o); setDeployments(d); });
+      })
       .catch((e) => setError(e.message));
     reloadCatalog();
     reloadTemplates();

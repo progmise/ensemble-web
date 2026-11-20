@@ -15,8 +15,12 @@ export default function ApplicationView({ manifest }) {
   const [published, setPublished] = useState(null);
   const [owners, setOwners] = useState([]);
 
+  const modelRepo = manifest.repo || 'progmise/ensemble-app-model';
+  const modelName = modelRepo.split('/')[1];
+  const appName = manifest.metadata?.name || modelName;
+
   useEffect(() => {
-    getRepo().then(setRepo).catch(() => setRepo({}));
+    getRepo(modelRepo).then(setRepo).catch(() => setRepo({}));
     getReleases()
       .then((rs) => setPublished(rs.find(
         (r) => r.version === manifest.version || r.version === `v${manifest.version}`)?.published ?? false))
@@ -25,7 +29,7 @@ export default function ApplicationView({ manifest }) {
       .then((ms) => setOwners(ms.filter((m) => (m.roles || [])
         .some((r) => OWNER_ROLES.includes(r)))))
       .catch(() => setOwners([]));
-  }, [manifest.version]);
+  }, [manifest.version, modelRepo]);
 
   const envs = manifest.environments || [];
   const comps = manifest.components || [];
@@ -34,12 +38,12 @@ export default function ApplicationView({ manifest }) {
     <div className="card app-detail">
       <section className="app-main">
         <div className="app-hero">
-          <span className="avatar big sq">{initials('deploy-manifest')}</span>
-          <h2>deploy-manifest</h2>
+          <span className="avatar big sq">{initials(modelName)}</span>
+          <h2>{modelName}</h2>
         </div>
         <div className="app-id">
           <div><label>Organización</label><strong>progmise</strong></div>
-          <div><label>Aplicación</label><strong>deploy-manifest</strong></div>
+          <div><label>Aplicación</label><strong>{appName}</strong></div>
           <div><label>Estado</label>
             {published === null ? <strong>—</strong>
               : published ? <span className="pill ok">Publicado</span>
@@ -51,9 +55,9 @@ export default function ApplicationView({ manifest }) {
         </div>
         <div className="app-links">
           <label>Enlaces útiles</label>
-          <a href="https://github.com/progmise/deploy-manifest#readme"
+          <a href={`https://github.com/${modelRepo}#readme`}
              target="_blank" rel="noreferrer">Documentación ↗</a>
-          <a href="https://github.com/progmise/deploy-manifest"
+          <a href={`https://github.com/${modelRepo}`}
              target="_blank" rel="noreferrer">Repositorio ↗</a>
           <a href="https://github.com/progmise/reusable-workflows"
              target="_blank" rel="noreferrer">Workflows reutilizables ↗</a>
@@ -81,7 +85,7 @@ export default function ApplicationView({ manifest }) {
         </div>
         <div className="app-tools">
           <div className="tools-btns">
-            <a className="btn btn-outline" href="https://github.com/progmise/deploy-manifest"
+            <a className="btn btn-outline" href={`https://github.com/${modelRepo}`}
                target="_blank" rel="noreferrer">{GhIcon} GitHub</a>
             <a className="btn btn-outline" href="https://github.com/progmise/reusable-workflows"
                target="_blank" rel="noreferrer">{PrIcon} Workflows</a>

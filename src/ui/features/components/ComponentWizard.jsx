@@ -198,7 +198,7 @@ export default function ComponentWizard({ template, components = [],
                     : ' con main y development protegidas'}
                   , se configurarán secrets/variables
                   {(template.spec?.manifest ?? template.kind === 'app')
-                    && ' y se abrirá un PR de registro en deploy-manifest'}.
+                    && ` y se abrirá un PR de registro en ${form.application}-app-model`}.
                 </p>
               </div>
             )}
@@ -211,7 +211,7 @@ export default function ComponentWizard({ template, components = [],
                     {result.repo} ↗
                   </a>
                   {result.manifest_pr
-                    ? <> · <a href={`https://github.com/progmise/deploy-manifest/pull/${result.manifest_pr}`}
+                    ? <> · <a href={`https://github.com/progmise/${form.application}-app-model/pull/${result.manifest_pr}`}
                           target="_blank" rel="noreferrer">PR #{result.manifest_pr} ↗</a></>
                     : null}
                 </p>

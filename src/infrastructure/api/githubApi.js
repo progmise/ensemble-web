@@ -2,7 +2,7 @@
 import * as yaml from 'js-yaml';
 import { apiGet } from './client.js';
 
-const MANIFEST_REPO = 'progmise/deploy-manifest';
+const MANIFEST_REPO = 'progmise/ensemble-app-model';
 
 export function getRepo(repo = MANIFEST_REPO) {
   return apiGet(`/api/gh/repos/${repo}`);
@@ -11,13 +11,16 @@ export function getRepo(repo = MANIFEST_REPO) {
 export async function getManifest(application) {
   const url = application
     ? `/api/manifest?application=${encodeURIComponent(application)}` : '/api/manifest';
-  const text = await (await fetch(url)).text();
-  return yaml.load(text);
+  const res = await fetch(url);
+  const manifest = yaml.load(await res.text());
+  // The API resolves the app's app-model repo — it travels with the manifest.
+  manifest.repo = res.headers.get('x-manifest-repo') || MANIFEST_REPO;
+  return manifest;
 }
 
-export function getOrchRuns() {
+export function getOrchRuns(repo = MANIFEST_REPO) {
   return apiGet(
-    `/api/gh/repos/${MANIFEST_REPO}/actions/workflows/deploy.yml/runs?per_page=10`,
+    `/api/gh/repos/${repo}/actions/workflows/deploy.yml/runs?per_page=10`,
   ).then((d) => d.workflow_runs);
 }
 

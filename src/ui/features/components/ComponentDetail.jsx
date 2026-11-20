@@ -69,7 +69,7 @@ export default function ComponentDetail({ name, templates = [], manifest, onChan
             <a href={`https://github.com/${repo}`} target="_blank" rel="noreferrer">Repositorio ↗</a>
           </>}
           {db.manifest_pr &&
-            <a href={`https://github.com/progmise/deploy-manifest/pull/${db.manifest_pr}`}
+            <a href={`https://github.com/progmise/${db.application}-app-model/pull/${db.manifest_pr}`}
                target="_blank" rel="noreferrer">PR de registro ↗</a>}
         </div>
       </section>
@@ -104,7 +104,7 @@ export default function ComponentDetail({ name, templates = [], manifest, onChan
                  target="_blank" rel="noreferrer">{GhIcon} GitHub</a>}
             {db.manifest_pr &&
               <a className="btn btn-outline"
-                 href={`https://github.com/progmise/deploy-manifest/pull/${db.manifest_pr}`}
+                 href={`https://github.com/progmise/${db.application}-app-model/pull/${db.manifest_pr}`}
                  target="_blank" rel="noreferrer">{PrIcon} PR de registro</a>}
             {status === 'failed' &&
               <button className="btn" onClick={retry} disabled={busy}>

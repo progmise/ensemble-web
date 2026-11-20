@@ -1,13 +1,13 @@
 # ensemble-web
 
-React SPA — the front for the `deploy-manifest`
+React SPA — the front for the OAM app-model
 orchestrator. The backend lives in a separate repo:
 [`ensemble-api`](https://github.com/progmise/ensemble-api)
 (GitHub OAuth + allowlist + `/api/gh` proxy). Sign-in uses **GitHub OAuth**;
 GitHub reads use the caller's own token (HttpOnly cookie — nothing secret in
 the browser).
 
-Sidebar: **Aplicación** (platform detail card: manifest
+In-app navigation: **Aplicación** (app-model detail card: manifest
 version, component/env counts, lifecycle, responsables), **Componentes**
 (table + dependency graph), **Equipo** (member registry + roles),
 **Despliegues** (orchestrated runs joined to their RLSE record) and
@@ -47,7 +47,7 @@ Same `app-*` thin callers as every deployable repo
 (`reusable-workflows@v1`): CI on PR, integration publishes
 `docker.io/progmise/ensemble-web` on merge, release tags + publishes
 `:<version>` (version lives in `package.json`), deploy to Vercel via
-`deploy.yml` or the `deploy-manifest` orchestrator.
+`deploy.yml` or the app-model orchestrator.
 
 ## Required config
 

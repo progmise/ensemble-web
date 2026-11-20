@@ -14,7 +14,8 @@ Components never call `fetch` directly.
 ```
 src/
   main.jsx                   entry, renders app/App
-  app/App.jsx                shell — topbar, crumbs, sidebar, view switch
+  app/App.jsx                shell — topbar, ☰ menu, app-scoped sidebar, view
+                             switch (landing = full-width home + app tiles)
   domain/component.js        pure rules: NAME_RE/REPO_RE, STATUS_LABEL,
                              mergeCatalog (manifest ⨝ catalog), filter
   application/               use cases as hooks:
@@ -39,8 +40,8 @@ src/
                              flip up via useDropUp)
     features/
       session/Gate.jsx       Login / Unauthorized / UserMenu
-      app/ApplicationView.jsx   platform detail card (deploy-manifest) —
-                                first sidebar item / landing view
+      app/ApplicationView.jsx   app-model detail card — first app-scoped
+                                sidebar item
       releases/ReleasesView.jsx, ReleaseDetail.jsx
       components/            ComponentsTable, ComponentDetail (
                              app card), ComponentRuns,
@@ -98,5 +99,5 @@ Work branches: `<type>/<snake_description>` — `feature/`, `fix/`, `chore/`,
 All pipeline logic lives in `progmise/reusable-workflows` (`@v1`,
 `secrets: inherit`) — callers in `.github/workflows/` are thin; keep them so.
 Bump `version` in `package.json`, merge `development` → `main`, then run the
-**Release** workflow manually on `main`. Deploys go through `deploy-manifest`
-(`deploy.yml` dispatch); the Vercel project was created lazily on first deploy.
+**Release** workflow manually on `main`. Deploys go through the app-model repo
+(`deploy.yml` orchestrated dispatch); the Vercel project was created lazily on first deploy.
