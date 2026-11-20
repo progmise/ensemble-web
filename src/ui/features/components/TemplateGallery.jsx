@@ -30,7 +30,7 @@ export default function TemplateGallery({ templates, onPick, onChanged }) {
           <>
             <span className="chips" style={{ marginLeft: 'auto' }}>
               {[['all', 'Todas'], ['app', 'Apps'], ['lib', 'Libs'], ['cm', 'CMs'],
-                ['secrets', 'Secrets']].map(([v, l]) => (
+                ['secrets', 'Secrets'], ['app-model', 'OAM']].map(([v, l]) => (
                 <button key={v}
                   className={`chip${kind === v ? ' chip-teal' : ''}`}
                   style={{ cursor: 'pointer', border: 'none' }}
@@ -58,7 +58,8 @@ export default function TemplateGallery({ templates, onPick, onChanged }) {
               <div className="tpl-card-head">
                 <span className="tpl-meta">
                   {t.kind === 'lib' ? 'Lib' : t.kind === 'cm' ? 'CM'
-                    : t.kind === 'secrets' ? 'Sec' : 'App'}
+                    : t.kind === 'secrets' ? 'Sec'
+                    : t.kind === 'app-model' ? 'OAM' : 'App'}
                   <span className={`chip${t.kind === 'lib' ? '' : ' chip-teal'}`}>{t.kind}</span>
                 </span>
                 <strong>{t.display_name || t.name}</strong>

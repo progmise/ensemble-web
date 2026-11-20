@@ -79,8 +79,8 @@ export function getReleases() {
   return apiGet('/api/releases');
 }
 
-export function getReleaseOptions() {
-  return apiGet('/api/releases/options');
+export function getReleaseOptions(application) {
+  return apiGet(`/api/releases/options${application ? `?application=${encodeURIComponent(application)}` : ''}`);
 }
 
 export function createRelease(body) {

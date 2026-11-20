@@ -11,7 +11,7 @@ const STEPS = [
   'Resumen de confirmación',
 ];
 
-const KIND_BADGE = { lib: 'LIB', cm: 'CM' };
+const KIND_BADGE = { lib: 'LIB', cm: 'CM', 'app-model': 'OAM' };
 
 export default function ComponentWizard({ template, components = [],
   applications = [], defaultApplication = '', onClose, onBack, onCreated }) {

@@ -21,7 +21,7 @@ const COLUMNS = [
 // Lista de releases — "Releases": RLSE<number> wraps the deploy-manifest
 // release v<version>; Estado reflects the manifest release (draft/Publicado),
 // the doc icon opens the detail/status view.
-export default function ReleasesView({ releases, me, onChanged, onOpen }) {
+export default function ReleasesView({ releases, me, app, onChanged, onOpen }) {
   const [q, setQ] = useState('');
   const [date, setDate] = useState('');
   const [sort, setSort] = useState({ key: 'release_no', dir: -1 });
@@ -86,7 +86,7 @@ export default function ReleasesView({ releases, me, onChanged, onOpen }) {
         </tbody>
       </table>
       {releases && !rows.length && <p className="muted">Sin releases para esa búsqueda.</p>}
-      {showForm && <ReleaseModal me={me} releases={releases}
+      {showForm && <ReleaseModal me={me} releases={releases} app={app}
         onClose={() => setShowForm(false)} onCreated={onChanged} />}
     </div>
   );
@@ -117,7 +117,7 @@ const RECOVERY_PLANS = [
   'Return to previous version',
 ];
 
-function ReleaseModal({ me, releases, onClose, onCreated }) {
+function ReleaseModal({ me, releases, app, onClose, onCreated }) {
   const [step, setStep] = useState(0);
   const [options, setOptions] = useState(null);
   const [leads, setLeads] = useState([]);
@@ -137,7 +137,7 @@ function ReleaseModal({ me, releases, onClose, onCreated }) {
     || me?.email || me?.login || '';
 
   useEffect(() => {
-    getReleaseOptions()
+    getReleaseOptions(app)
       .then((o) => {
         setOptions(o);
         if (o.trails?.length === 1)
@@ -153,7 +153,7 @@ function ReleaseModal({ me, releases, onClose, onCreated }) {
           .some((r) => r === 'technical-lead' || r === 'product-owner')));
       })
       .catch(() => {});
-  }, []);
+  }, [app]);
 
   // "Releases recientes" — picking one autofills the info fields, like the
   // reference's autocomplete.
@@ -216,6 +216,7 @@ function ReleaseModal({ me, releases, onClose, onCreated }) {
     setError(null);
     try {
       await createRelease({
+        application: app || undefined,
         version: form.version,
         description: form.description,
         details: form.details,

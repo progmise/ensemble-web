@@ -8,8 +8,10 @@ export function getRepo(repo = MANIFEST_REPO) {
   return apiGet(`/api/gh/repos/${repo}`);
 }
 
-export async function getManifest() {
-  const text = await (await fetch('/api/manifest')).text();
+export async function getManifest(application) {
+  const url = application
+    ? `/api/manifest?application=${encodeURIComponent(application)}` : '/api/manifest';
+  const text = await (await fetch(url)).text();
   return yaml.load(text);
 }
 

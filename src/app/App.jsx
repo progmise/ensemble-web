@@ -8,6 +8,7 @@ import { Login, Unauthorized, UserMenu } from '../ui/features/session/Gate.jsx';
 import ReleasesView from '../ui/features/releases/ReleasesView.jsx';
 import ReleaseDetail from '../ui/features/releases/ReleaseDetail.jsx';
 import { useReleases } from '../application/useReleases.js';
+import { getManifest } from '../infrastructure/api/githubApi.js';
 import ComponentsTable from '../ui/features/components/ComponentsTable.jsx';
 import ComponentDetail from '../ui/features/components/ComponentDetail.jsx';
 import ApplicationView from '../ui/features/app/ApplicationView.jsx';
@@ -175,6 +176,19 @@ export default function App() {
   const { releases, reload: reloadReleases } = useReleases(
     ['releases', 'app-releases'].includes(view));
 
+  // Inside an application the manifest is the app's own OAM definition —
+  // fetched from its app-model repo (falls back to the global one when the
+  // app has no app-model component yet).
+  const [appManifestData, setAppManifestData] = useState(null);
+  useEffect(() => {
+    if (!appCtx || !appLabel) return undefined;
+    let dead = false;
+    getManifest(appLabel)
+      .then((m) => { if (!dead) setAppManifestData(m); })
+      .catch(() => { if (!dead) setAppManifestData(null); });
+    return () => { dead = true; };
+  }, [appCtx, appLabel]);
+
   if (me === undefined) return <CenterCard title="Ensemble" sub="Cargando…" />;
   if (me?.forbidden) return <Unauthorized />;
   if (!me) return <Login />;
@@ -200,10 +214,12 @@ export default function App() {
   const appComponentNames = appCtx
     ? catalog.filter((c) => c.application === appLabel).map((c) => c.name) : [];
   const appReleases = appCtx ? (releases || []).filter((r) =>
-    !r.components || r.components.some((c) => appComponentNames.includes(c))) : [];
+    r.application ? r.application === appLabel
+      : !r.components || r.components.some((c) => appComponentNames.includes(c))) : [];
+  const appManifestSrc = appManifestData || manifest;
   const appManifest = appCtx ? {
-    ...manifest,
-    components: (manifest.components || [])
+    ...appManifestSrc,
+    components: (appManifestSrc.components || [])
       .filter((c) => appComponentNames.includes(c.name)),
   } : manifest;
 
@@ -345,7 +361,8 @@ export default function App() {
           )}
 
           {view === 'app-releases' && (
-            <ReleasesView releases={appReleases} me={me} onChanged={reloadReleases}
+            <ReleasesView releases={appReleases} me={me} app={appLabel}
+              onChanged={reloadReleases}
               onOpen={(n) => { setReleaseNo(n); setView('release-detail'); }} />
           )}
 
